@@ -1,12 +1,11 @@
-import { Direction } from "../types.ts";
+import {Direction} from "../types.ts";
 
 export class Player {
-    width: number;
-    height: number;
     color: string;
     gravityStrength: number;
     grounded: boolean;
 
+    size: {width: number, height: number};
     cords: {x: number; y: number};
     velocity: {x: number; y: number};
     friction: number;
@@ -14,9 +13,8 @@ export class Player {
     speed: {side: number, jump: number};
     inputs: Set<Direction>;
 
-    constructor(width: number, height: number, color: string) {
-        this.width = width;
-        this.height = height;
+    constructor(size: {width: number, height: number}, color: string) {
+        this.size = size;
         this.color = color;
 
         this.grounded = false;
@@ -32,7 +30,7 @@ export class Player {
 
     draw(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.cords.x, this.cords.y, this.width, this.height);
+        ctx.fillRect(this.cords.x, this.cords.y, this.size.width, this.size.height);
     }
 
     applyGravity(ctx: CanvasRenderingContext2D) {
@@ -46,7 +44,7 @@ export class Player {
 
         this.cords.y += this.velocity.y;
 
-        const groundLevel = ctx.canvas.height - this.height;
+        const groundLevel = ctx.canvas.height - this.size.height;
         if (this.cords.y >= groundLevel) {
             this.cords.y = groundLevel;
             this.velocity.y = 0;
