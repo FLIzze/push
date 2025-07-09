@@ -1,12 +1,12 @@
-import {Player} from "./player";
-import {Direction} from "../types";
+import { Player } from "./player";
+import { Direction } from "../types";
 
 const PORT = 8080;
 const HOST = "localhost";
 
 const ws = new WebSocket(`ws://${HOST}:${PORT}`);
 
-const player = new Player({width: 30, height: 50}, "red");
+const player = new Player({ width: 30, height: 50 }, "red");
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -26,9 +26,10 @@ document.addEventListener("keyup", (e) => {
 });
 
 function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player.update();
     player.applyGravity(ctx);
+    player.update();
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     player.draw(ctx);
 
     if (ws.readyState === WebSocket.OPEN) {
