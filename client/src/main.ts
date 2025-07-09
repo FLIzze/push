@@ -1,7 +1,12 @@
 import {Player} from "./player";
-import { Direction } from "../types";
+import {Direction} from "../types";
 
-const player = new Player(30, 50, "red");
+const PORT = 8080;
+const HOST = "localhost";
+
+const ws = new WebSocket(`ws://${HOST}:${PORT}`);
+
+const player = new Player({width: 30, height: 50}, "red");
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -25,6 +30,11 @@ function gameLoop() {
     player.update();
     player.applyGravity(ctx);
     player.draw(ctx);
+
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(player.cords));
+    }
+
     requestAnimationFrame(gameLoop);
 }
 
