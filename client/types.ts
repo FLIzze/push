@@ -3,3 +3,7 @@ export enum Direction {
   Right,
   Up,
 }
+
+export interface Position {
+  cords: {x: number, y: number};
+}
