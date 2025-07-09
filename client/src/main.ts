@@ -1,4 +1,5 @@
 import {Player} from "./player";
+import { Direction } from "../types";
 
 const player = new Player(30, 50, "red");
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -8,15 +9,15 @@ canvas.width = 1500;
 canvas.height = 500;
 
 document.addEventListener("keydown", (e) => {
-    if (e.key === "a") player.startMove("left");
-    if (e.key === "d") player.startMove("right");
-    if (e.key === " ") player.startMove("jump")
+    if (e.key === "a") player.startMove(Direction.Left);
+    if (e.key === "d") player.startMove(Direction.Right);
+    if (e.key === " ") player.startMove(Direction.Up)
 });
 
 document.addEventListener("keyup", (e) => {
-    if (e.key === "a") player.stopMove("left");
-    if (e.key === "d") player.stopMove("right");
-    if (e.key === " ") player.stopMove("jump")
+    if (e.key === "a") player.stopMove(Direction.Left);
+    if (e.key === "d") player.stopMove(Direction.Right);
+    if (e.key === " ") player.stopMove(Direction.Up)
 });
 
 function gameLoop() {

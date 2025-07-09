@@ -4,13 +4,13 @@ import css from "@eslint/css";
 import {defineConfig} from "eslint/config";
 
 export default defineConfig([
-        {files: ["**/*.js"], languageOptions: {sourceType: "script"}},
-        {files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: {globals: globals.browser}},
-        tseslint.configs.recommended,
-        {files: ["**/*.css"], plugins: {css}, language: "css/css"},
-        {
-                rules: {
-                        indent: ["error", 4],
-                },
+    {files: ["**/*.js"], languageOptions: {sourceType: "script"}},
+    {files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: {globals: globals.browser}},
+    tseslint.configs.recommended,
+    {files: ["**/*.css"], plugins: {css}, language: "css/css"},
+    {
+        rules: {
+            indent: ["error", 4],
         },
+    },
 ]);
