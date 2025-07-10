@@ -1,5 +1,6 @@
 import { Player } from "./player";
 import { Direction } from "../types";
+import type { PlayerData, WsConnect, WsCords, WsDisconnect, WsPlayersCordBroadcast, WsPlayersList } from "../../types/types.ts"
 
 const PORT = 8080;
 const HOST = "localhost";
@@ -14,46 +15,6 @@ const players: PlayerData[] = [];
 
 canvas.width = 1500;
 canvas.height = 500;
-
-type WsPlayersList = {
-    type: "playersList";
-    data: PlayerData[];
-}
-
-export type PlayerData = {
-    id: string;
-    name: string;
-    size: { x: number, y: number };
-    cords: { x: number, y: number };
-    color: string;
-}
-
-export type WsConnect = {
-    type: "connect";
-    data: PlayerData;
-}
-
-// type WsDisconnect = {
-//     type: "disconnect";
-//     data: {
-//         id: string;
-//     };
-// }
-
-type WsCords = {
-    type: "cords";
-    data: PlayerInfo;
-}
-
-type ServerBroadcast = {
-    type: "broadcast";
-    data: PlayerInfo[];
-}
-
-type PlayerInfo = {
-    cords: { x: number, y: number };
-    id: string;
-}
 
 ws.onopen = () => {
     const data: WsConnect = {
@@ -75,13 +36,16 @@ ws.onmessage = (event) => {
 
     switch (parsedMessage.type) {
     case "broadcast":
-        const dataBroadcast: ServerBroadcast = parsedMessage;
+        // sent 60 times a second, all players position
+        const dataBroadcast: WsPlayersCordBroadcast = parsedMessage;
+
         for (const player of dataBroadcast.data) {
-            const internalPlayer = players.find(p => p.id === player.id);
-            if (internalPlayer) {
-                internalPlayer.cords = player.cords;
+            const p = players.find(p => p.id === player.id);
+            if (p) {
+                p.cords = player.cords;
             }
         }
+
         break
     case "connect":
         const dataConnect: WsConnect = parsedMessage;
@@ -92,6 +56,11 @@ ws.onmessage = (event) => {
         for (const player of dataPlayerList.data) {
             players.push(player);
         }
+        break;
+    case "disconnect":
+        const dataDisconnect: WsDisconnect = parsedMessage;
+        const player = players.findIndex(player => player.id === dataDisconnect.data.id);
+        players.splice(player, 1);
         break;
     default:
         console.log(`unknown type ${parsedMessage.type}`);
@@ -112,11 +81,10 @@ document.addEventListener("keyup", (e) => {
 });
 
 function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     player.applyGravity(ctx);
     player.update();
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player.draw(ctx, players);
 
     if (ws.readyState === WebSocket.OPEN) {
         const data: WsCords = {
@@ -128,6 +96,8 @@ function gameLoop() {
         }
         ws.send(JSON.stringify(data));
     }
+
+    player.draw(ctx, players);
 
     requestAnimationFrame(gameLoop);
 }
