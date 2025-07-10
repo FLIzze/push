@@ -1,5 +1,5 @@
+import type { PlayerData } from "../../types/types.ts";
 import { Direction } from "../types.ts";
-import type { PlayerData } from "./main.ts";
 import { generateUUID } from "./utils/uuid.ts";
 
 export class Player {
@@ -38,7 +38,6 @@ export class Player {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.cords.x, this.cords.y, this.size.x, this.size.y);
 
-        console.log(players);
         for (const player of players) {
             if (player.id === this.id) {
                 continue;
