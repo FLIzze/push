@@ -1,11 +1,15 @@
 import { Direction } from "../types.ts";
+import type { PlayerData } from "./main.ts";
+import { generateUUID } from "./utils/uuid.ts";
 
 export class Player {
     color: string;
     gravityStrength: number;
     grounded: boolean;
+    name: string;
+    id: string;
 
-    size: { width: number, height: number };
+    size: { x: number, y: number };
     cords: { x: number; y: number };
     velocity: { x: number; y: number };
     friction: number;
@@ -13,9 +17,11 @@ export class Player {
     speed: { x: number, y: number };
     inputs: Set<Direction>;
 
-    constructor(size: { width: number, height: number }, color: string) {
+    constructor(size: { x: number, y: number }, color: string, name: string) {
         this.size = size;
         this.color = color;
+        this.name = name;
+        this.id = generateUUID();
 
         this.grounded = false;
         this.speed = { x: 0.2, y: -6 };
@@ -28,9 +34,19 @@ export class Player {
         this.inputs = new Set<Direction.Left>();
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D, players: PlayerData[]) {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.cords.x, this.cords.y, this.size.width, this.size.height);
+        ctx.fillRect(this.cords.x, this.cords.y, this.size.x, this.size.y);
+
+        console.log(players);
+        for (const player of players) {
+            if (player.id === this.id) {
+                continue;
+            }
+
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.cords.x, player.cords.y, player.size.x, player.size.y);
+        }
     }
 
     applyGravity(ctx: CanvasRenderingContext2D) {
@@ -44,7 +60,7 @@ export class Player {
 
         this.cords.y += this.velocity.y;
 
-        const groundLevel = ctx.canvas.height - this.size.height;
+        const groundLevel = ctx.canvas.height - this.size.y;
         if (this.cords.y >= groundLevel) {
             this.cords.y = groundLevel;
             this.velocity.y = 0;
