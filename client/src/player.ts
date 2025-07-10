@@ -31,7 +31,7 @@ export class Player {
 
         this.cords = { x: 80, y: 0 };
         this.velocity = { x: 0, y: 0 };
-        this.inputs = new Set<Direction.Left>();
+        this.inputs = new Set<Direction>();
     }
 
     draw(ctx: CanvasRenderingContext2D, players: PlayerData[]) {

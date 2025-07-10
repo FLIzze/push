@@ -18,7 +18,6 @@ wss.on("connection", (ws: ExtendedWs) => {
         case "connect":
             const dataConnect: WsConnect = parsedMessage;
             players.push(dataConnect.data);
-
             ws.playerId = dataConnect.data.id;
 
             // sends all players to new player

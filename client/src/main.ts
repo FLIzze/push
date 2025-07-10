@@ -33,6 +33,7 @@ ws.onopen = () => {
 
 ws.onmessage = (event) => {
     const parsedMessage = JSON.parse(event.data);
+    const playerId = player.id;
 
     switch (parsedMessage.type) {
     case "broadcast":
@@ -40,6 +41,10 @@ ws.onmessage = (event) => {
         const dataBroadcast: WsPlayersCordBroadcast = parsedMessage;
 
         for (const player of dataBroadcast.data) {
+            if (player.id === playerId) {
+                continue;
+            }
+
             const p = players.find(p => p.id === player.id);
             if (p) {
                 p.cords = player.cords;
@@ -49,12 +54,16 @@ ws.onmessage = (event) => {
         break
     case "connect":
         const dataConnect: WsConnect = parsedMessage;
-        players.push(dataConnect.data);
+        if (!players.some(player => player.id === dataConnect.data.id)) {
+            players.push(dataConnect.data);
+        }
         break;
     case "playersList":
         const dataPlayerList: WsPlayersList = parsedMessage;
         for (const player of dataPlayerList.data) {
-            players.push(player);
+            if (!players.some(p => p.id === player.id)) {
+                players.push(player);
+            }
         }
         break;
     case "disconnect":
@@ -98,6 +107,7 @@ function gameLoop() {
     }
 
     player.draw(ctx, players);
+    console.log(players);
 
     requestAnimationFrame(gameLoop);
 }
