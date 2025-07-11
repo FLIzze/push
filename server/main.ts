@@ -19,6 +19,16 @@ export class GameServer {
         console.log(`WebSocket server running on ws://localhost:${port}`);
     }
 
+    private handleConnection(ws: WebSocket) {
+        ws.on("message", (message) => {
+            this.handleMessage(ws, message);
+        });
+
+        ws.on("close", () => {
+            this.handleDisconnect(ws);
+        });
+    }
+
     private update() {
         for (const player of this._players.values()) {
             player.applyGravity();
@@ -62,11 +72,7 @@ export class GameServer {
 
     private handleConnect(ws: WsExtended, dataConnect: WsConnect) {
         ws.playerId = dataConnect.playerData.id;
-        const newPlayer = new Player();
-        newPlayer.id = dataConnect.playerData.id;
-        newPlayer.color = dataConnect.playerData.color;
-        newPlayer.cords = dataConnect.playerData.cords;
-
+        const newPlayer = new Player(dataConnect.playerData);
         this._players.set(ws.playerId, newPlayer);
 
         // sends all players to new player
@@ -102,7 +108,6 @@ export class GameServer {
                 break;
             case "inputs":
                 const dataInput: WsInputs = parsedMessage;
-                // console.log(`Client -> Server: inputs: ${dataInput.inputs}`);
                 this.handleInputs(ws, dataInput);
                 break;
             default:
@@ -127,16 +132,6 @@ export class GameServer {
         this.broadcast(message);
 
         console.log(`DISCONNECTED : ${ws.playerId}`);
-    }
-
-    private handleConnection(ws: WebSocket) {
-        ws.on("message", (message) => {
-            this.handleMessage(ws, message);
-        });
-
-        ws.on("close", () => {
-            this.handleDisconnect(ws);
-        });
     }
 }
 
