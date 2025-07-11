@@ -1,26 +1,25 @@
+import type { Direction } from "../client/types";
+
 interface WsPlayersList {
     type: "playersList";
-    data: PlayerData[];
+    playersData: PlayerData[];
 }
 
 interface PlayerData {
     id: string;
-    name: string;
-    size: { x: number, y: number };
-    cords: { x: number, y: number };
     color: string;
+    cords: { x: number, y: number };
+    size: { x: number, y: number };
 }
 
 interface WsConnect {
     type: "connect";
-    data: PlayerData;
+    playerData: PlayerData;
 }
 
 interface WsDisconnect {
     type: "disconnect";
-    data: {
-        id: string;
-    };
+    id: string;
 }
 
 interface WsCords {
@@ -38,4 +37,16 @@ interface Cords {
     id: string;
 }
 
-export { Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsPlayersList, WsConnect, PlayerData };
+interface WsInputs {
+    type: "inputs";
+    inputs: Direction[];
+}
+
+interface PlayerInitData {
+    id?: string;
+    color?: string;
+    cords?: { x: number; y: number };
+    size?: { x: number; y: number };
+}
+
+export type { PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsPlayersList, WsConnect };

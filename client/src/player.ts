@@ -1,96 +1,85 @@
-import type { PlayerData } from "../../types/types.ts";
+import type { PlayerInitData } from "../../types/types.ts";
 import { Direction } from "../types.ts";
 import { generateUUID } from "./utils/uuid.ts";
 
 export class Player {
-    color: string;
-    gravityStrength: number;
-    grounded: boolean;
-    name: string;
-    id: string;
+    private readonly _gravityStrength: number;
+    private readonly _friction: number;
+    private readonly _terminalVelocity: { x: number, y: number };
 
-    size: { x: number, y: number };
-    cords: { x: number; y: number };
-    velocity: { x: number; y: number };
-    friction: number;
-    terminalVelocity: { x: number, y: number };
-    speed: { x: number, y: number };
-    inputs: Set<Direction>;
+    private _grounded: boolean;
+    private _velocity: { x: number; y: number };
+    private _speed: { x: number, y: number };
 
-    constructor(size: { x: number, y: number }, color: string, name: string) {
-        this.size = size;
-        this.color = color;
-        this.name = name;
-        this.id = generateUUID();
+    public cords: { x: number; y: number };
+    public color: string;
+    public id: string;
+    public size: { x: number, y: number };
+    public inputs: Set<Direction>;
 
-        this.grounded = false;
-        this.speed = { x: 0.2, y: -6 };
-        this.terminalVelocity = { x: 8, y: -10 };
-        this.gravityStrength = 0.5;
-        this.friction = 0.8;
+    constructor(data?: PlayerInitData) {
+        this._gravityStrength = 0.5;
+        this._friction = 0.8;
+        this._terminalVelocity = { x: 8, y: -10 };
+
+        this._grounded = false;
+        this._velocity = { x: 0, y: 0 };
+        this._speed = { x: 0.2, y: -8 };
 
         this.cords = { x: 80, y: 0 };
-        this.velocity = { x: 0, y: 0 };
+        this.size = { x: 50, y: 100 };
+        this.color = "red";
+        this.id = generateUUID();
         this.inputs = new Set<Direction>();
-    }
 
-    draw(ctx: CanvasRenderingContext2D, players: PlayerData[]) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.cords.x, this.cords.y, this.size.x, this.size.y);
-
-        for (const player of players) {
-            if (player.id === this.id) {
-                continue;
-            }
-
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.cords.x, player.cords.y, player.size.x, player.size.y);
+        if (data) {
+            Object.assign(this, data);
         }
     }
 
-    applyGravity(ctx: CanvasRenderingContext2D) {
-        if (!this.grounded) {
-            this.velocity.y += this.gravityStrength;
+    public applyGravity() {
+        if (!this._grounded) {
+            this._velocity.y += this._gravityStrength;
 
-            if (this.velocity.y > Math.abs(this.terminalVelocity.y)) {
-                this.velocity.y = Math.abs(this.terminalVelocity.y);
+            if (this._velocity.y > Math.abs(this._terminalVelocity.y)) {
+                this._velocity.y = Math.abs(this._terminalVelocity.y);
             }
         }
 
-        this.cords.y += this.velocity.y;
+        this.cords.y += this._velocity.y;
 
-        const groundLevel = ctx.canvas.height - this.size.y;
+        const groundLevel = 300;
         if (this.cords.y >= groundLevel) {
             this.cords.y = groundLevel;
-            this.velocity.y = 0;
-            this.grounded = true;
+            this._velocity.y = 0;
+            this._grounded = true;
         }
     }
 
-    update() {
+    public update() {
         if (this.inputs.has(Direction.Left)) {
-            this.velocity.x = Math.max(this.velocity.x - this.speed.x, -this.terminalVelocity.x);
+            this._velocity.x = Math.max(this._velocity.x - this._speed.x, -this._terminalVelocity.x);
         } else if (this.inputs.has(Direction.Right)) {
-            this.velocity.x = Math.min(this.velocity.x + this.speed.x, this.terminalVelocity.x);
+            this._velocity.x = Math.min(this._velocity.x + this._speed.x, this._terminalVelocity.x);
         } else {
-            this.velocity.x *= this.friction;
-            if (Math.abs(this.velocity.x) < 0.1) this.velocity.x = 0;
+            this._velocity.x *= this._friction;
+            if (Math.abs(this._velocity.x) < 0.1) this._velocity.x = 0;
         }
 
-        if (this.inputs.has(Direction.Up) && this.grounded) {
-            this.velocity.y = this.speed.y;
-            this.grounded = false;
+        if (this.inputs.has(Direction.Up) && this._grounded) {
+            this._velocity.y = this._speed.y;
+            this._grounded = false;
         }
 
-        this.cords.x += this.velocity.x;
-        this.cords.y += this.velocity.y;
+        this.cords.x += this._velocity.x;
+        this.cords.y += this._velocity.y;
     }
 
-    startMove(direction: Direction) {
+    public startMove(direction: Direction) {
         this.inputs.add(direction);
     }
 
-    stopMove(direction: Direction) {
+    public stopMove(direction: Direction) {
         this.inputs.delete(direction);
     }
 }
