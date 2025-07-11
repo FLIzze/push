@@ -1,30 +1,30 @@
 import { Player } from "./player";
 import { Direction } from "../types";
-import type { PlayerData, WsConnect, WsCords, WsDisconnect, WsPlayersCordBroadcast, WsPlayersList } from "../../types/types.ts"
+import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsPlayersList } from "../../types/types.ts"
 
 const PORT = 8080;
 const HOST = "localhost";
 
 const ws = new WebSocket(`ws://${HOST}:${PORT}`);
-
-const player = new Player({ x: 30, y: 50 }, "red", "rensky");
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-
-const players: PlayerData[] = [];
 
 canvas.width = 1500;
 canvas.height = 500;
 
+const player = new Player();
+const players = new Map<string, Player>;
+
 ws.onopen = () => {
+    players.set(player.id, player);
+
     const data: WsConnect = {
         type: "connect",
-        data: {
+        playerData: {
             id: player.id,
-            name: player.name,
             size: player.size,
             cords: player.cords,
-            color: player.color
+            color: player.color,
         },
     };
 
@@ -32,48 +32,50 @@ ws.onopen = () => {
 };
 
 ws.onmessage = (event) => {
-    const parsedMessage = JSON.parse(event.data);
-    const playerId = player.id;
+    let parsedMessage: any;
+    try {
+        parsedMessage = JSON.parse(event.data);
+    } catch (err) {
+        console.error(`Error parsing message: ${err}`);
+        return;
+    }
 
     switch (parsedMessage.type) {
-    case "broadcast":
-        // sent 60 times a second, all players position
-        const dataBroadcast: WsPlayersCordBroadcast = parsedMessage;
+        case "broadcast":
+            // sent 60 times a second, all players position
+            const dataBroadcast: WsPlayersCordBroadcast = parsedMessage;
 
-        for (const player of dataBroadcast.data) {
-            if (player.id === playerId) {
-                continue;
+            for (const cords of dataBroadcast.data) {
+                const player = players.get(cords.id);
+
+                if (!player) {
+                    console.error("Could not match id with a player");
+                    return;
+                }
+
+                player.cords = cords.cords;
             }
 
-            const p = players.find(p => p.id === player.id);
-            if (p) {
-                p.cords = player.cords;
+            break
+        case "connect":
+            const dataConnect: WsConnect = parsedMessage;
+            const newPlayer = new Player(dataConnect.playerData);
+            players.set(newPlayer.id, newPlayer);
+            break;
+        case "playersList":
+            const dataPlayerList: WsPlayersList = parsedMessage;
+            for (const playerData of dataPlayerList.playersData) {
+                const newPlayer = new Player(playerData);
+                players.set(newPlayer.id, newPlayer);
             }
-        }
-
-        break
-    case "connect":
-        const dataConnect: WsConnect = parsedMessage;
-        if (!players.some(player => player.id === dataConnect.data.id)) {
-            players.push(dataConnect.data);
-        }
-        break;
-    case "playersList":
-        const dataPlayerList: WsPlayersList = parsedMessage;
-        for (const player of dataPlayerList.data) {
-            if (!players.some(p => p.id === player.id)) {
-                players.push(player);
-            }
-        }
-        break;
-    case "disconnect":
-        const dataDisconnect: WsDisconnect = parsedMessage;
-        const player = players.findIndex(player => player.id === dataDisconnect.data.id);
-        players.splice(player, 1);
-        break;
-    default:
-        console.log(`unknown type ${parsedMessage.type}`);
-        break;
+            break;
+        case "disconnect":
+            const dataDisconnect: WsDisconnect = parsedMessage;
+            players.delete(dataDisconnect.id);
+            break;
+        default:
+            console.log(`unknown type ${parsedMessage.type}`);
+            break;
     }
 };
 
@@ -89,25 +91,28 @@ document.addEventListener("keyup", (e) => {
     if (e.key === " ") player.stopMove(Direction.Up)
 });
 
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    player.applyGravity(ctx);
-    player.update();
-
-    if (ws.readyState === WebSocket.OPEN) {
-        const data: WsCords = {
-            type: "cords",
-            data: {
-                cords: player.cords,
-                id: player.id,
-            },
-        }
-        ws.send(JSON.stringify(data));
+function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>) {
+    for (const player of players.values()) {
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.cords.x, player.cords.y, player.size.x, player.size.y);
     }
+}
 
-    player.draw(ctx, players);
-    console.log(players);
+function sendInputs() {
+    if (ws.readyState === ws.OPEN) {
+        const wsInputs: WsInputs = {
+            type: "inputs",
+            inputs: Array.from(player.inputs),
+        }
+        ws.send(JSON.stringify(wsInputs));
+    }
+}
+
+function gameLoop() {
+    sendInputs();
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPlayers(ctx, players);
 
     requestAnimationFrame(gameLoop);
 }
