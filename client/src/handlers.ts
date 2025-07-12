@@ -39,7 +39,7 @@ function handlePlayersList(parsedMessage: any, players: Map<string, Player>) {
     }
 
     for (const obstacleData of gameData.obstaclesData) {
-        const newObstacle = new Obstacle(obstacleData.cords, obstacleData.size);
+        const newObstacle = new Obstacle(obstacleData.cords, obstacleData.size, obstacleData.color);
         obstacles.add(newObstacle);
     }
 }
