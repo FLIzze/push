@@ -17,7 +17,6 @@ function handleBroadcast(parsedMessage: any, players: Map<string, Player>) {
 
         player.cords = cords.cords;
     }
-
 }
 
 function handleDisconnect(parsedMessage: any, players: Map<string, Player>) {

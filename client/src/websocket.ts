@@ -49,14 +49,18 @@ ws.onmessage = (event) => {
     }
 };
 
+
 function sendInputs() {
-    if (ws.readyState === ws.OPEN) {
-        const wsInputs: WsInputs = {
-            type: "inputs",
-            inputs: Array.from(player.inputs),
-        }
-        ws.send(JSON.stringify(wsInputs));
+    if (ws.readyState !== ws.OPEN) {
+        return;
     }
+
+    const wsInputs: WsInputs = {
+        type: "inputs",
+        inputs: Array.from(player.inputs),
+    }
+
+    ws.send(JSON.stringify(wsInputs));
 }
 
 export { sendInputs };

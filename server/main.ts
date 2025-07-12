@@ -15,6 +15,7 @@ export class GameServer {
     constructor(port: number) {
         const floor = new Obstacle({ x: 0, y: 400 }, { x: 1500, y: 30 }, "black");
         const wall = new Obstacle({ x: 600, y: 300 }, { x: 50, y: 100 }, "blue");
+
         this._obstacles.add(floor);
         this._obstacles.add(wall);
 
@@ -48,6 +49,10 @@ export class GameServer {
                 cords: player.cords,
             })),
         };
+
+        // for (const data of dataBroadcast.cords) {
+        //     console.log(`BROADCAST    : TO   ${data.id} X: ${data.cords.x}, Y" ${data.cords.y}`);
+        // }
 
         const message = JSON.stringify(dataBroadcast);
         this.broadcast(message);
@@ -108,7 +113,7 @@ export class GameServer {
         this.broadcast(JSON.stringify(message));
     }
 
-    private handleMessage(ws: WebSocket, message: RawData) {
+    private handleMessage(ws: WsExtended, message: RawData) {
         // type will be determined in case
         const parsedMessage = JSON.parse(message.toString());
 
@@ -120,6 +125,7 @@ export class GameServer {
                 break;
             case "inputs":
                 const dataInput: WsInputs = parsedMessage;
+                console.log(`INPUTS       : FROM ${ws.playerId} ${dataInput.inputs}`);
                 this.handleInputs(ws, dataInput);
                 break;
             default:
