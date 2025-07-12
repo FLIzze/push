@@ -15,7 +15,7 @@
 - [x] Players can see each other and move
 - [ ] Ping/pong latency measurement
 - [ ] Connection recovery / reconnection logic
-- [ ] Efficient state diffing (send only changed state)
+- [x] Efficient state diffing (send only changed state)
 - [ ] Lobby
 
 ---
