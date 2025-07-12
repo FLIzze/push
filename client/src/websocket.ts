@@ -37,7 +37,7 @@ ws.onmessage = (event) => {
         case "connect":
             handleConnect(parsedMessage, players);
             break;
-        case "playersList":
+        case "gameData":
             handlePlayersList(parsedMessage, players);
             break;
         case "disconnect":

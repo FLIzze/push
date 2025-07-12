@@ -1,8 +1,16 @@
+import type { Obstacle } from "../client/src/obstacle";
 import type { Direction } from "../client/types";
 
-interface WsPlayersList {
-    type: "playersList";
+interface WsGameData {
+    type: "gameData";
     playersData: PlayerData[];
+    obstaclesData: ObstacleData[];
+}
+
+interface ObstacleData {
+    color: string;
+    cords: { x: number, y: number };
+    size: { x: number, y: number };
 }
 
 interface PlayerData {
@@ -29,7 +37,7 @@ interface WsCords {
 
 interface WsPlayersCordBroadcast {
     type: "broadcast";
-    data: Cords[];
+    cords: Cords[];
 }
 
 interface Cords {
@@ -49,4 +57,4 @@ interface PlayerInitData {
     size?: { x: number; y: number };
 }
 
-export type { PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsPlayersList, WsConnect };
+export type { ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };

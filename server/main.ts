@@ -1,6 +1,7 @@
 import { RawData, WebSocket, WebSocketServer } from "ws";
 import { Player } from "../client/src/player.ts";
-import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsPlayersList } from "../types/types.ts";
+import { Obstacle } from "../client/src/obstacle.ts";
+import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsGameData } from "../types/types.ts";
 
 interface WsExtended extends WebSocket {
     playerId?: string;
@@ -9,8 +10,14 @@ interface WsExtended extends WebSocket {
 export class GameServer {
     private _wss: WebSocketServer;
     private _players: Map<string, Player> = new Map();
+    private _obstacles: Set<Obstacle> = new Set();
 
     constructor(port: number) {
+        const obstacle = new Obstacle({ x: 0, y: 400 }, { x: 1500, y: 30 });
+        const wall = new Obstacle({ x: 600, y: 200 }, { x: 50, y: 200 });
+        this._obstacles.add(obstacle);
+        this._obstacles.add(wall);
+
         this._wss = new WebSocketServer({ port });
         this._wss.on("connection", (ws: WsExtended) => this.handleConnection(ws));
 
@@ -37,7 +44,7 @@ export class GameServer {
 
         const dataBroadcast: WsPlayersCordBroadcast = {
             type: "broadcast",
-            data: Array.from(this._players.values()).map(player => ({
+            cords: Array.from(this._players.values()).map(player => ({
                 id: player.id,
                 cords: player.cords,
             })),
@@ -76,17 +83,23 @@ export class GameServer {
         this._players.set(ws.playerId, newPlayer);
 
         // sends all players to new player
-        const playersList: WsPlayersList = {
-            type: "playersList",
+        const gameData: WsGameData = {
+            type: "gameData",
             playersData: Array.from(this._players.values()).map(player => ({
                 id: player.id,
                 color: player.color,
                 cords: player.cords,
                 size: player.size,
             })),
+            obstaclesData: Array.from(this._obstacles).map(obstacle => ({
+                color: obstacle.color,
+                cords: obstacle.cords,
+                size: obstacle.size,
+            })),
         };
 
-        ws.send(JSON.stringify(playersList));
+        console.log(gameData);
+        ws.send(JSON.stringify(gameData));
 
         // broadcast new player information to all players
         const message: WsConnect = {
