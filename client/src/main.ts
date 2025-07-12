@@ -1,7 +1,8 @@
 import { Player } from "./player";
 import { Direction } from "../types";
-import { drawPlayers } from "./utils/draw.ts";
+import { drawObstacles, drawPlayers } from "./utils/draw.ts";
 import { sendInputs } from "./websocket.ts";
+import { Obstacle } from "./obstacle.ts";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 canvas.width = 1500;
@@ -10,6 +11,7 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
 const player = new Player();
 const players = new Map<string, Player>;
+const obstacles = new Set<Obstacle>;
 
 document.addEventListener("keydown", (e) => {
     if (e.key === "a") player.startMove(Direction.Left);
@@ -27,6 +29,7 @@ function gameLoop() {
     sendInputs();
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawObstacles(ctx, obstacles);
     drawPlayers(ctx, players);
 
     requestAnimationFrame(gameLoop);
@@ -34,4 +37,4 @@ function gameLoop() {
 
 gameLoop();
 
-export { player, players };
+export { player, players, obstacles };

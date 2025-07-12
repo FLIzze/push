@@ -1,4 +1,4 @@
-import type { PlayerInitData } from "../../types/types.ts";
+import type { ObstacleData, PlayerInitData } from "../../types/types.ts";
 import { Direction } from "../types.ts";
 import { generateUUID } from "./utils/uuid.ts";
 
@@ -73,6 +73,9 @@ export class Player {
 
         this.cords.x += this._velocity.x;
         this.cords.y += this._velocity.y;
+    }
+
+    public collisions(obstacles: Set<ObstacleData>) {
     }
 
     public startMove(direction: Direction) {
