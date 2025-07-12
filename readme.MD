@@ -13,9 +13,9 @@
 
 ### WebSockets & Networking
 - [x] Players can see each other and move
-- [ ] Ping/pong latency measurement
+- [x] Ping/pong latency measurement
 - [ ] Connection recovery / reconnection logic
-- [ ] Efficient state diffing (send only changed state)
+- [x] Efficient state diffing (send only changed state)
 - [ ] Lobby
 
 ---
@@ -54,7 +54,7 @@
 ### Debug & Tools
 - [ ] Hitbox/physics debug overlay
 - [ ] FPS and ping display
-- [ ] Logging toggle (client/server)
+- [x] Logging toggle (client/server)
 
 ---
 

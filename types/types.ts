@@ -57,4 +57,9 @@ interface PlayerInitData {
     size?: { x: number; y: number };
 }
 
-export type { ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };
+interface WsPing {
+    type: "ping";
+    timestamp: number;
+}
+
+export type { WsPing, ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };

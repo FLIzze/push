@@ -1,5 +1,5 @@
 import type { WsConnect, WsInputs } from "../../types/types.ts"
-import { handleBroadcast, handleConnect, handleDisconnect, handlePlayersList } from "./handlers.ts";
+import { handleBroadcast, handleConnect, handleDisconnect, handlePing, handlePlayersList } from "./handlers.ts";
 import { player, players } from "./main.ts";
 
 const PORT = 8080;
@@ -43,20 +43,33 @@ ws.onmessage = (event) => {
         case "disconnect":
             handleDisconnect(parsedMessage, players);
             break;
+        case "ping":
+            handlePing(parsedMessage);
+            break;
         default:
             console.log(`unknown type ${parsedMessage.type}`);
             break;
     }
 };
 
+
 function sendInputs() {
-    if (ws.readyState === ws.OPEN) {
-        const wsInputs: WsInputs = {
-            type: "inputs",
-            inputs: Array.from(player.inputs),
-        }
-        ws.send(JSON.stringify(wsInputs));
+    if (ws.readyState !== ws.OPEN) {
+        return;
     }
+
+    const wsInputs: WsInputs = {
+        type: "inputs",
+        inputs: Array.from(player.inputs),
+    }
+
+    ws.send(JSON.stringify(wsInputs));
 }
 
-export { sendInputs };
+function sendPing() {
+    const timestamp = performance.now();
+    const message = JSON.stringify({ type: "ping", timestamp: timestamp });
+    ws.send(message);
+}
+
+export { sendInputs, sendPing };

@@ -13,6 +13,7 @@ export class Player {
 
     public velocity: { x: number; y: number };
     public cords: { x: number; y: number };
+    public previousCords: { x: number; y: number };
     public color: string;
     public id: string;
     public size: { x: number, y: number };
@@ -28,6 +29,8 @@ export class Player {
         this._speed = { x: 0.2, y: -12 };
 
         this.cords = { x: 80, y: 0 };
+        this.previousCords = { x: 80, y: 0 };
+
         this.size = { x: 50, y: 100 };
         this.color = "red";
         this.id = generateUUID();
@@ -63,7 +66,12 @@ export class Player {
         }
     }
 
+    public hasMoved(): boolean {
+        return this.cords.x !== this.previousCords.x || this.cords.y !== this.previousCords.y;
+    }
+
     public update(obstacles: Set<Obstacle>) {
+        this.previousCords = { ...this.cords };
         this.handleInputs();
         this.applyGravity();
 
@@ -110,13 +118,5 @@ export class Player {
                 this.velocity.y = 0;
             }
         }
-    }
-
-    public startMove(direction: Direction) {
-        this.inputs.add(direction);
-    }
-
-    public stopMove(direction: Direction) {
-        this.inputs.delete(direction);
     }
 }
