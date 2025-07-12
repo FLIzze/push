@@ -14,31 +14,41 @@ const players = new Map<string, Player>;
 const obstacles = new Set<Obstacle>;
 
 document.addEventListener("keydown", (e) => {
-    if (e.key === "a") {
-        player.startMove(Direction.Left)
-        sendInputs();
+    let changed = false;
+
+    if (e.key === "a" && !player.inputs.has(Direction.Left)) {
+        player.inputs.add(Direction.Left)
+        changed = true;
     };
-    if (e.key === "d") {
-        player.startMove(Direction.Right)
-        sendInputs();
+
+    if (e.key === "d" && !player.inputs.has(Direction.Right)) {
+        player.inputs.add(Direction.Right)
+        changed = true;
     };
-    if (e.key === " ") {
-        player.startMove(Direction.Up)
-        sendInputs();
+
+    if (e.key === " " && !player.inputs.has(Direction.Up)) {
+        player.inputs.add(Direction.Up)
+        changed = true;
     };
+
+    if (changed) {
+        sendInputs();
+    }
 });
 
 document.addEventListener("keyup", (e) => {
     if (e.key === "a") {
-        player.stopMove(Direction.Left)
+        player.inputs.delete(Direction.Left)
         sendInputs();
     };
+
     if (e.key === "d") {
-        player.stopMove(Direction.Right)
+        player.inputs.delete(Direction.Right)
         sendInputs();
     };
+
     if (e.key === " ") {
-        player.stopMove(Direction.Up)
+        player.inputs.delete(Direction.Up)
         sendInputs();
     };
 });

@@ -1,7 +1,7 @@
 import { RawData, WebSocket, WebSocketServer } from "ws";
 import { Player } from "../client/src/player.ts";
 import { Obstacle } from "../client/src/obstacle.ts";
-import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsGameData } from "../types/types.ts";
+import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsGameData, Cords } from "../types/types.ts";
 
 interface WsExtended extends WebSocket {
     playerId?: string;
@@ -38,21 +38,31 @@ export class GameServer {
     }
 
     private update() {
+        const cords: Cords[] = [];
+
         for (const player of this._players.values()) {
             player.update(this._obstacles);
+
+            if (player.hasMoved()) {
+                cords.push({
+                    cords: player.cords,
+                    id: player.id,
+                });
+            }
+        }
+
+        if (cords.length === 0) {
+            return;
         }
 
         const dataBroadcast: WsPlayersCordBroadcast = {
             type: "broadcast",
-            cords: Array.from(this._players.values()).map(player => ({
-                id: player.id,
-                cords: player.cords,
-            })),
+            cords: cords,
         };
 
-        // for (const data of dataBroadcast.cords) {
-        //     console.log(`BROADCAST    : TO   ${data.id} X: ${data.cords.x}, Y" ${data.cords.y}`);
-        // }
+        for (const data of dataBroadcast.cords) {
+            console.log(`BROADCAST    : TO   ${data.id} X: ${data.cords.x}, Y" ${data.cords.y}`);
+        }
 
         const message = JSON.stringify(dataBroadcast);
         this.broadcast(message);
