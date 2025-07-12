@@ -13,9 +13,9 @@ export class GameServer {
     private _obstacles: Set<Obstacle> = new Set();
 
     constructor(port: number) {
-        const obstacle = new Obstacle({ x: 0, y: 400 }, { x: 1500, y: 30 });
-        const wall = new Obstacle({ x: 600, y: 200 }, { x: 50, y: 200 });
-        this._obstacles.add(obstacle);
+        const floor = new Obstacle({ x: 0, y: 400 }, { x: 1500, y: 30 }, "black");
+        const wall = new Obstacle({ x: 600, y: 300 }, { x: 50, y: 100 }, "blue");
+        this._obstacles.add(floor);
         this._obstacles.add(wall);
 
         this._wss = new WebSocketServer({ port });
@@ -38,8 +38,7 @@ export class GameServer {
 
     private update() {
         for (const player of this._players.values()) {
-            player.applyGravity();
-            player.update();
+            player.update(this._obstacles);
         }
 
         const dataBroadcast: WsPlayersCordBroadcast = {

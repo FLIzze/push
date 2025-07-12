@@ -1,5 +1,6 @@
-import type { ObstacleData, PlayerInitData } from "../../types/types.ts";
+import type { PlayerInitData } from "../../types/types.ts";
 import { Direction } from "../types.ts";
+import type { Obstacle } from "./obstacle.ts";
 import { generateUUID } from "./utils/uuid.ts";
 
 export class Player {
@@ -8,9 +9,9 @@ export class Player {
     private readonly _terminalVelocity: { x: number, y: number };
 
     private _grounded: boolean;
-    private _velocity: { x: number; y: number };
     private _speed: { x: number, y: number };
 
+    public velocity: { x: number; y: number };
     public cords: { x: number; y: number };
     public color: string;
     public id: string;
@@ -20,11 +21,11 @@ export class Player {
     constructor(data?: PlayerInitData) {
         this._gravityStrength = 0.5;
         this._friction = 0.8;
-        this._terminalVelocity = { x: 8, y: -10 };
+        this._terminalVelocity = { x: 8, y: -20 };
 
         this._grounded = false;
-        this._velocity = { x: 0, y: 0 };
-        this._speed = { x: 0.2, y: -8 };
+        this.velocity = { x: 0, y: 0 };
+        this._speed = { x: 0.2, y: -12 };
 
         this.cords = { x: 80, y: 0 };
         this.size = { x: 50, y: 100 };
@@ -37,45 +38,78 @@ export class Player {
         }
     }
 
-    public applyGravity() {
-        if (!this._grounded) {
-            this._velocity.y += this._gravityStrength;
-
-            if (this._velocity.y > Math.abs(this._terminalVelocity.y)) {
-                this._velocity.y = Math.abs(this._terminalVelocity.y);
-            }
-        }
-
-        this.cords.y += this._velocity.y;
-
-        const groundLevel = 300;
-        if (this.cords.y >= groundLevel) {
-            this.cords.y = groundLevel;
-            this._velocity.y = 0;
-            this._grounded = true;
-        }
-    }
-
-    public update() {
+    private handleInputs() {
         if (this.inputs.has(Direction.Left)) {
-            this._velocity.x = Math.max(this._velocity.x - this._speed.x, -this._terminalVelocity.x);
+            this.velocity.x = Math.max(this.velocity.x - this._speed.x, -this._terminalVelocity.x);
         } else if (this.inputs.has(Direction.Right)) {
-            this._velocity.x = Math.min(this._velocity.x + this._speed.x, this._terminalVelocity.x);
+            this.velocity.x = Math.min(this.velocity.x + this._speed.x, this._terminalVelocity.x);
         } else {
-            this._velocity.x *= this._friction;
-            if (Math.abs(this._velocity.x) < 0.1) this._velocity.x = 0;
+            this.velocity.x *= this._friction;
+            if (Math.abs(this.velocity.x) < 0.1) this.velocity.x = 0;
         }
 
         if (this.inputs.has(Direction.Up) && this._grounded) {
-            this._velocity.y = this._speed.y;
+            this.velocity.y = this._speed.y;
             this._grounded = false;
         }
-
-        this.cords.x += this._velocity.x;
-        this.cords.y += this._velocity.y;
     }
 
-    public collisions(obstacles: Set<ObstacleData>) {
+    private applyGravity() {
+        if (!this._grounded) {
+            this.velocity.y += this._gravityStrength;
+            if (this.velocity.y > Math.abs(this._terminalVelocity.y)) {
+                this.velocity.y = Math.abs(this._terminalVelocity.y);
+            }
+        }
+    }
+
+    public update(obstacles: Set<Obstacle>) {
+        this.handleInputs();
+        this.applyGravity();
+
+        this.cords.x += this.velocity.x;
+        this.resolveCollisions(obstacles, "x");
+
+        this.cords.y += this.velocity.y;
+        this._grounded = false;
+        this.resolveCollisions(obstacles, "y");
+    }
+
+
+    private resolveCollisions(obstacles: Set<Obstacle>, axis: "x" | "y") {
+        for (const obs of obstacles) {
+            const playerRight = this.cords.x + this.size.x;
+            const playerBottom = this.cords.y + this.size.y;
+            const obsRight = obs.cords.x + obs.size.x;
+            const obsBottom = obs.cords.y + obs.size.y;
+
+            const isColliding =
+                playerRight > obs.cords.x &&
+                this.cords.x < obsRight &&
+                playerBottom > obs.cords.y &&
+                this.cords.y < obsBottom;
+
+            if (!isColliding) continue;
+
+            if (axis === "x") {
+                if (this.velocity.x > 0) {
+                    this.cords.x = obs.cords.x - this.size.x;
+                } else if (this.velocity.x < 0) {
+                    this.cords.x = obs.cords.x + obs.size.x;
+                }
+
+                this.velocity.x = 0;
+            } else if (axis === "y") {
+                if (this.velocity.y > 0) {
+                    this.cords.y = obs.cords.y - this.size.y;
+                    this._grounded = true;
+                } else if (this.velocity.y < 0) {
+                    this.cords.y = obs.cords.y + obs.size.y;
+                }
+
+                this.velocity.y = 0;
+            }
+        }
     }
 
     public startMove(direction: Direction) {
