@@ -7,9 +7,7 @@
 ---
 
 ### Collisions
-- [ ] Player-to-player collisions
-- [ ] Obstacle collisions
-- [ ] Knockback 
+- [x] Obstacle collisions
 
 ---
 
@@ -31,7 +29,7 @@
 ---
 
 ### Obstacles & Level Design
-- [ ] Add static obstacle support
+- [x] Add static obstacle support
 - [ ] Level loader from JSON / Tiled format
 - [ ] Platform types (solid, passthrough, bouncy, etc.)
 - [ ] Level builder
