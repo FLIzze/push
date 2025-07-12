@@ -1,7 +1,7 @@
 import { RawData, WebSocket, WebSocketServer } from "ws";
 import { Player } from "../client/src/player.ts";
 import { Obstacle } from "../client/src/obstacle.ts";
-import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsGameData, Cords } from "../types/types.ts";
+import type { WsConnect, WsDisconnect, WsInputs, WsPlayersCordBroadcast, WsGameData, Cords, WsPing } from "../types/types.ts";
 
 interface WsExtended extends WebSocket {
     playerId?: string;
@@ -79,7 +79,9 @@ export class GameServer {
         }
     }
 
-    private handleInputs(ws: WsExtended, dataInputs: WsInputs) {
+    private handleInputs(ws: WsExtended, parsedMessage: any) {
+        const dataInput: WsInputs = parsedMessage;
+
         if (!ws.playerId) {
             console.error("Could not determine player id");
             return;
@@ -91,10 +93,16 @@ export class GameServer {
             return;
         }
 
-        player.inputs = new Set(dataInputs.inputs);
+        console.log(
+            `\x1b[34mINPUTS\x1b[0m       : FROM   \x1b[33m${ws.playerId}\x1b[0m \x1b[36m[${dataInput.inputs.join(", ")}]\x1b[0m`
+        );
+
+        player.inputs = new Set(dataInput.inputs);
     }
 
-    private handleConnect(ws: WsExtended, dataConnect: WsConnect) {
+    private handleConnect(ws: WsExtended, parsedMessage: any) {
+        const dataConnect: WsConnect = parsedMessage;
+
         ws.playerId = dataConnect.playerData.id;
         const newPlayer = new Player(dataConnect.playerData);
         this._players.set(ws.playerId, newPlayer);
@@ -123,6 +131,10 @@ export class GameServer {
             playerData: dataConnect.playerData,
         }
         this.broadcast(JSON.stringify(message));
+
+        console.log(
+            `\x1b[32mCONNECTED\x1b[0m    : \x1b[33m${dataConnect.playerData.id}\x1b[0m`
+        );
     }
 
     private handleMessage(ws: WsExtended, message: RawData) {
@@ -131,18 +143,13 @@ export class GameServer {
 
         switch (parsedMessage.type) {
             case "connect":
-                const dataConnect: WsConnect = parsedMessage;
-                console.log(
-                    `\x1b[32mCONNECTED\x1b[0m    : \x1b[33m${dataConnect.playerData.id}\x1b[0m`
-                );
-                this.handleConnect(ws, dataConnect);
+                this.handleConnect(ws, parsedMessage);
                 break;
             case "inputs":
-                const dataInput: WsInputs = parsedMessage;
-                console.log(
-                    `\x1b[34mINPUTS\x1b[0m       : FROM   \x1b[33m${ws.playerId}\x1b[0m \x1b[36m[${dataInput.inputs.join(", ")}]\x1b[0m`
-                );
-                this.handleInputs(ws, dataInput);
+                this.handleInputs(ws, parsedMessage);
+                break;
+            case "ping":
+                this.handlePing(ws, parsedMessage);
                 break;
             default:
                 console.log(`unknown type ${parsedMessage.type}`);
@@ -168,6 +175,11 @@ export class GameServer {
         console.log(
             `\x1b[31mDISCONNECTED\x1b[0m : \x1b[33m${ws.playerId}\x1b[0m`
         );
+    }
+
+    private handlePing(ws: WsExtended, parsedMessage: any) {
+        const dataPing: WsPing = parsedMessage;
+        ws.send(JSON.stringify(dataPing));
     }
 }
 

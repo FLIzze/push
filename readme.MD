@@ -13,7 +13,7 @@
 
 ### WebSockets & Networking
 - [x] Players can see each other and move
-- [ ] Ping/pong latency measurement
+- [x] Ping/pong latency measurement
 - [ ] Connection recovery / reconnection logic
 - [x] Efficient state diffing (send only changed state)
 - [ ] Lobby

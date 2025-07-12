@@ -1,8 +1,8 @@
 import { Player } from "./player";
+import { Obstacle } from "./obstacle.ts";
 import { Direction } from "../types";
 import { drawObstacles, drawPlayers } from "./utils/draw.ts";
-import { Obstacle } from "./obstacle.ts";
-import { sendInputs } from "./websocket.ts";
+import { sendInputs, sendPing } from "./websocket.ts";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 canvas.width = 1500;
@@ -53,14 +53,33 @@ document.addEventListener("keyup", (e) => {
     };
 });
 
+let latency = { value: 0 };
+
+let lastFrameTime = performance.now();
+let fps = 0;
+
+setInterval(() => sendPing(), 1000);
+
 function gameLoop() {
+    const now = performance.now();
+    const delta = now - lastFrameTime;
+
+    fps = 1000 / delta;
+    lastFrameTime = now;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawObstacles(ctx, obstacles);
     drawPlayers(ctx, players);
+
+    ctx.fillStyle = "black";
+    ctx.font = "22px Arial";
+    ctx.fillText(`FPS ${fps.toFixed()}`, 10, 20);
+
+    ctx.fillText(`MS ${latency.value}`, 90, 20);
 
     requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
 
-export { player, players, obstacles };
+export { player, players, obstacles, latency };

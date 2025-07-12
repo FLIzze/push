@@ -1,5 +1,5 @@
-import type { WsConnect, WsDisconnect, WsPlayersCordBroadcast, WsGameData } from "../../types/types";
-import { obstacles } from "./main";
+import type { WsConnect, WsDisconnect, WsPlayersCordBroadcast, WsGameData, WsPing } from "../../types/types";
+import { latency, obstacles } from "./main";
 import { Obstacle } from "./obstacle";
 import { Player } from "./player";
 
@@ -32,6 +32,7 @@ function handleConnect(parsedMessage: any, players: Map<string, Player>) {
 
 function handlePlayersList(parsedMessage: any, players: Map<string, Player>) {
     const gameData: WsGameData = parsedMessage;
+
     for (const playerData of gameData.playersData) {
         const newPlayer = new Player(playerData);
         players.set(newPlayer.id, newPlayer);
@@ -43,4 +44,9 @@ function handlePlayersList(parsedMessage: any, players: Map<string, Player>) {
     }
 }
 
-export { handlePlayersList, handleConnect, handleDisconnect, handleBroadcast };
+function handlePing(parsedMessage: any) {
+    const pingData: WsPing = parsedMessage;
+    latency.value = (performance.now() - pingData.timestamp) / 2;
+}
+
+export { handlePing, handlePlayersList, handleConnect, handleDisconnect, handleBroadcast };
