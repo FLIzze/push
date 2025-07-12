@@ -61,7 +61,10 @@ export class GameServer {
         };
 
         for (const data of dataBroadcast.cords) {
-            console.log(`BROADCAST    : TO   ${data.id} X: ${data.cords.x}, Y" ${data.cords.y}`);
+            const id = data.id.slice(0, 8);
+            console.log(
+                `\x1b[35m[${new Date().toISOString()}] BROADCASTING\x1b[0m : \x1b[33mPLAYER ${id}\x1b[0m CORDS: X: \x1b[32m${data.cords.x.toFixed(2)}\x1b[0m, Y: \x1b[32m${data.cords.y.toFixed(2)}\x1b[0m`
+            );
         }
 
         const message = JSON.stringify(dataBroadcast);
@@ -112,7 +115,6 @@ export class GameServer {
             })),
         };
 
-        console.log(gameData);
         ws.send(JSON.stringify(gameData));
 
         // broadcast new player information to all players
@@ -130,12 +132,16 @@ export class GameServer {
         switch (parsedMessage.type) {
             case "connect":
                 const dataConnect: WsConnect = parsedMessage;
-                console.log(`CONNECTED    : ${dataConnect.playerData.id}`);
+                console.log(
+                    `\x1b[32mCONNECTED\x1b[0m    : \x1b[33m${dataConnect.playerData.id}\x1b[0m`
+                );
                 this.handleConnect(ws, dataConnect);
                 break;
             case "inputs":
                 const dataInput: WsInputs = parsedMessage;
-                console.log(`INPUTS       : FROM ${ws.playerId} ${dataInput.inputs}`);
+                console.log(
+                    `\x1b[34mINPUTS\x1b[0m       : FROM   \x1b[33m${ws.playerId}\x1b[0m \x1b[36m[${dataInput.inputs.join(", ")}]\x1b[0m`
+                );
                 this.handleInputs(ws, dataInput);
                 break;
             default:
@@ -159,7 +165,9 @@ export class GameServer {
         const message = JSON.stringify(dataDisconnect);
         this.broadcast(message);
 
-        console.log(`DISCONNECTED : ${ws.playerId}`);
+        console.log(
+            `\x1b[31mDISCONNECTED\x1b[0m : \x1b[33m${ws.playerId}\x1b[0m`
+        );
     }
 }
 
