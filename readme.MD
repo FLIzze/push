@@ -53,7 +53,7 @@
 
 ### Debug & Tools
 - [ ] Hitbox/physics debug overlay
-- [ ] FPS and ping display
+- [x] FPS and ping display
 - [x] Logging toggle (client/server)
 
 ---

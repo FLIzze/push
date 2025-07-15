@@ -1,4 +1,3 @@
-import type { Obstacle } from "../client/src/obstacle";
 import type { Direction } from "../client/types";
 
 interface WsGameData {

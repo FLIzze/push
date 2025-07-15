@@ -1,10 +1,32 @@
 import type { WsConnect, WsDisconnect, WsPlayersCordBroadcast, WsGameData, WsPing } from "../../../types/types";
 import { latency, obstacles } from "./game.ts";
-import { Obstacle } from "./obstacle.ts";
+import { Obstacle } from "../obstacle.ts";
 import { Player } from "./player.ts";
 
+function handleParsedMessage(parsedMessage: any, players: Map<string, Player>) {
+    switch (parsedMessage.type) {
+        case "broadcast":
+            handleBroadcast(parsedMessage, players);
+            break
+        case "connect":
+            handleConnect(parsedMessage, players);
+            break;
+        case "gameData":
+            handlePlayersList(parsedMessage, players);
+            break;
+        case "disconnect":
+            handleDisconnect(parsedMessage, players);
+            break;
+        case "ping":
+            handlePing(parsedMessage);
+            break;
+        default:
+            console.log(`unknown type ${parsedMessage.type}`);
+            break;
+    }
+}
+
 function handleBroadcast(parsedMessage: any, players: Map<string, Player>) {
-    // sent 60 times a second, all players position
     const dataBroadcast: WsPlayersCordBroadcast = parsedMessage;
 
     for (const cords of dataBroadcast.cords) {
@@ -49,4 +71,4 @@ function handlePing(parsedMessage: any) {
     latency.value = (performance.now() - pingData.timestamp) / 2;
 }
 
-export { handlePing, handlePlayersList, handleConnect, handleDisconnect, handleBroadcast };
+export { handlePing, handlePlayersList, handleConnect, handleDisconnect, handleBroadcast, handleParsedMessage };

@@ -14,6 +14,9 @@ document.addEventListener("click", (e) => {
     obstacles.add(new Obstacle({ x: e.x, y: e.y }, { x: 100, y: 100 }, "red"));
 });
 
+function obstacleParameters(ctx: CanvasRenderingContext2D) {
+}
+
 function gameLoop() {
     drawObstacles(ctx, obstacles);
     requestAnimationFrame(gameLoop);

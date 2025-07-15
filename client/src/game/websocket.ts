@@ -1,5 +1,5 @@
 import type { WsConnect, WsInputs } from "../../../types/types.ts";
-import { handleBroadcast, handleConnect, handleDisconnect, handlePing, handlePlayersList } from "./handlers.ts";
+import { handleParsedMessage } from "./handler.ts";
 import { player, players } from "./game.ts";
 
 const PORT = 8080;
@@ -30,26 +30,7 @@ ws.onmessage = (event) => {
         return;
     }
 
-    switch (parsedMessage.type) {
-        case "broadcast":
-            handleBroadcast(parsedMessage, players);
-            break
-        case "connect":
-            handleConnect(parsedMessage, players);
-            break;
-        case "gameData":
-            handlePlayersList(parsedMessage, players);
-            break;
-        case "disconnect":
-            handleDisconnect(parsedMessage, players);
-            break;
-        case "ping":
-            handlePing(parsedMessage);
-            break;
-        default:
-            console.log(`unknown type ${parsedMessage.type}`);
-            break;
-    }
+    handleParsedMessage(parsedMessage, players);
 };
 
 
