@@ -1,12 +1,12 @@
 import { Player } from "./player";
-import { Obstacle } from "./obstacle.ts";
-import { Direction } from "../types";
-import { drawObstacles, drawPlayers } from "./utils/draw.ts";
+import { Obstacle } from "../obstacle.ts";
+import { Direction } from "../../types";
+import { drawObstacles, drawPlayers } from "../utils/draw.ts";
 import { sendInputs, sendPing } from "./websocket.ts";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-canvas.width = 1500;
-canvas.height = 500;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
 const player = new Player();
@@ -82,4 +82,4 @@ function gameLoop() {
 
 gameLoop();
 
-export { player, players, obstacles, latency };
+export { player, players, obstacles, latency, gameLoop };

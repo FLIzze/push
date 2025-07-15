@@ -1,7 +1,7 @@
-import type { WsConnect, WsDisconnect, WsPlayersCordBroadcast, WsGameData, WsPing } from "../../types/types";
-import { latency, obstacles } from "./main";
-import { Obstacle } from "./obstacle";
-import { Player } from "./player";
+import type { WsConnect, WsDisconnect, WsPlayersCordBroadcast, WsGameData, WsPing } from "../../../types/types";
+import { latency, obstacles } from "./game.ts";
+import { Obstacle } from "./obstacle.ts";
+import { Player } from "./player.ts";
 
 function handleBroadcast(parsedMessage: any, players: Map<string, Player>) {
     // sent 60 times a second, all players position

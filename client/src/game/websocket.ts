@@ -1,6 +1,6 @@
-import type { WsConnect, WsInputs } from "../../types/types.ts"
+import type { WsConnect, WsInputs } from "../../../types/types.ts";
 import { handleBroadcast, handleConnect, handleDisconnect, handlePing, handlePlayersList } from "./handlers.ts";
-import { player, players } from "./main.ts";
+import { player, players } from "./game.ts";
 
 const PORT = 8080;
 const ws = new WebSocket(`ws://localhost:${PORT}`);
