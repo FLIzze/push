@@ -61,4 +61,12 @@ interface WsPing {
     timestamp: number;
 }
 
-export type { WsPing, ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };
+interface Button {
+    cords: { x: number, y: number };
+    size: { x: number, y: number };
+    onClick: () => void;
+    color: string;
+    label?: string;
+}
+
+export type { Button, WsPing, ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };
