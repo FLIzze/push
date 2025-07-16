@@ -1,5 +1,5 @@
-import type { Obstacle } from "../obstacle";
-import type { Player } from "../player";
+import type { Obstacle } from "../obstacle.ts";
+import type { Player } from "../game/player.ts";
 
 function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>) {
     for (const player of players.values()) {
