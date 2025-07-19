@@ -17,7 +17,6 @@ function drawObstacles(ctx: CanvasRenderingContext2D, obstacles: Set<Obstacle>) 
     });
 }
 
-
 function drawObstacleParameters(obstacle: Obstacle, ctx: CanvasRenderingContext2D, buttons: Set<Button>) {
     const { x: cX, y: cY } = obstacle.cords;
     const panelWidth = 300;
@@ -192,6 +191,4 @@ function drawButtons(buttons: Set<Button>, ctx: CanvasRenderingContext2D) {
     }
 }
 
-export { drawHandlers, drawOutlines, drawObstacleParameters, drawButtons };
-
-export { drawPlayers, drawObstacles };
+export { drawHandlers, drawOutlines, drawObstacleParameters, drawButtons, drawPlayers, drawObstacles };
