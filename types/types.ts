@@ -69,4 +69,10 @@ interface Button {
     label?: string;
 }
 
-export type { Button, WsPing, ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };
+interface Tool {
+    cords: { x: number, y: number };
+    size: { x: number, y: number };
+    label: "edit" | "add" | "delete";
+}
+
+export type { Tool, Button, WsPing, ObstacleData, WsGameData, PlayerInitData, WsInputs, Cords, WsPlayersCordBroadcast, WsCords, WsDisconnect, WsConnect };

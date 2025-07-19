@@ -1,31 +1,44 @@
-import type { Button } from "../../../types/types";
+import type { Button, Tool } from "../../../types/types";
 import { Obstacle } from "../obstacle";
 import { editorState as eS } from "./state.ts";
 
 function handleLeftClick(e: MouseEvent) {
-    if (handleButtonClick()) return;
-
-    const obstacle = getObstacleUnderMouse();
-    if (obstacle) {
-        eS.selectedObstacle.value = obstacle;
+    const tool = getToolUnderMouse();
+    if (tool && tool.label) {
+        eS.tool.value = tool.label;
         return;
     }
 
-    if (eS.selectedObstacle.value) {
-        eS.selectedObstacle.value = null;
-        return;
+    switch (eS.tool.value) {
+        case "add":
+            const newObstacle = new Obstacle({ x: e.x, y: e.y }, { x: 200, y: 200 }, "red");
+            eS.obstacles.add(newObstacle);
+            break;
+        case "delete":
+            const obstacle = getObstacleUnderMouse();
+            if (obstacle) {
+                eS.obstacles.delete(obstacle);
+                eS.selectedObstacle.value = null;
+            }
+            break;
+        case "edit":
+            if (handleButtonClick()) return;
+
+            const obstacle2 = getObstacleUnderMouse();
+            if (obstacle2) {
+                eS.selectedObstacle.value = obstacle2;
+                return;
+            }
+
+            if (eS.selectedObstacle.value) {
+                eS.selectedObstacle.value = null;
+                return;
+            }
+            break;
+        default:
+            break;
     }
 
-    const newObstacle = new Obstacle({ x: e.x, y: e.y }, { x: 200, y: 200 }, "red");
-    eS.obstacles.add(newObstacle);
-}
-
-function handleMiddleClick() {
-    const obstacle = getObstacleUnderMouse();
-    if (obstacle) {
-        eS.obstacles.delete(obstacle);
-        eS.selectedObstacle.value = null;
-    }
 }
 
 function handleButtonClick(): boolean {
@@ -60,6 +73,15 @@ function getObstacleUnderMouse(): Obstacle | null {
     return null;
 }
 
+function getToolUnderMouse(): Tool | null {
+    for (const tool of eS.tools) {
+        if (isPointInside(eS.mousePos, tool.cords, tool.size)) {
+            return tool;
+        }
+    }
+    return null;
+}
+
 function getButtonUnderMouse(): Button | null {
     for (const button of eS.buttons) {
         if (isPointInside(eS.mousePos, button.cords, button.size)) {
@@ -76,6 +98,22 @@ function handleMouseUp() {
         eS.resizeDirection.value = null;
         eS.resizeOffset.x = 0;
         eS.resizeOffset.y = 0;
+    }
+}
+
+function handleKeypress(e: KeyboardEvent) {
+    switch (e.key) {
+        case "a":
+            eS.tool.value = "add";
+            break;
+        case "d":
+            eS.tool.value = "delete";
+            break;
+        case "e":
+            eS.tool.value = "edit";
+            break;
+        default:
+            break;
     }
 }
 
@@ -124,4 +162,4 @@ function handleMouseMove(e: MouseEvent) {
     }
 }
 
-export { handleMiddleClick, handleLeftClick, handleMouseMove, handleMouseUp, getObstacleUnderMouse, getButtonUnderMouse };
+export { handleKeypress, handleLeftClick, handleMouseMove, handleMouseUp, getObstacleUnderMouse, getButtonUnderMouse, getToolUnderMouse };

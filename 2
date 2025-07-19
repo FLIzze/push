@@ -1,5 +1,5 @@
 import { drawButtons, drawObstacleParameters, drawOutlines, drawObstacles, drawTools } from "../utils/draw.ts";
-import { getButtonUnderMouse, getObstacleUnderMouse, getToolUnderMouse, handleKeypress, handleLeftClick, handleMouseMove, handleMouseUp } from "./handler.ts";
+import { getButtonUnderMouse, getObstacleUnderMouse, getToolUnderMouse, handleLeftClick, handleMiddleClick, handleMouseMove, handleMouseUp } from "./handler.ts";
 import { editorState as eS } from "./state.ts";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -9,22 +9,23 @@ canvas.height = window.innerHeight;
 
 eS.tools.add({
     cords: { x: 0, y: 0 },
-    size: { x: 60, y: 60 },
+    size: { x: 40, y: 40 },
     label: "add",
 });
 eS.tools.add({
-    cords: { x: 70, y: 0 },
-    size: { x: 60, y: 60 },
+    cords: { x: 50, y: 0 },
+    size: { x: 40, y: 40 },
     label: "delete",
 });
 eS.tools.add({
-    cords: { x: 140, y: 0 },
-    size: { x: 60, y: 60 },
-    label: "edit",
+    cords: { x: 100, y: 0 },
+    size: { x: 40, y: 40 },
+    label: "resize",
 });
-
-document.addEventListener("keypress", (e) => {
-    handleKeypress(e);
+eS.tools.add({
+    cords: { x: 150, y: 0 },
+    size: { x: 40, y: 40 },
+    label: "drag",
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -40,7 +41,8 @@ document.addEventListener("mousedown", (e) => {
         case 0:
             handleLeftClick(e);
             break;
-        default:
+        case 1:
+            handleMiddleClick();
             break;
     }
 });
@@ -57,7 +59,7 @@ function gameLoop() {
 
     if (!eS.selectedObstacle.value) {
         const hoveredObstacle = getObstacleUnderMouse();
-        if (hoveredObstacle && eS.tool.value !== "add") drawOutlines(hoveredObstacle.size, hoveredObstacle.cords, ctx);
+        if (hoveredObstacle) drawOutlines(hoveredObstacle, ctx);
     }
 
     if (eS.buttons.size > 0) {
@@ -65,12 +67,6 @@ function gameLoop() {
     }
 
     drawTools(ctx);
-
-    for (const tool of eS.tools.values()) {
-        if (tool.label === eS.tool.value) {
-            drawOutlines(tool.size, tool.cords, ctx);
-        }
-    }
 
     if (eS.drag.value) {
         canvas.style.cursor = "grabbing";

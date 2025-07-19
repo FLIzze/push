@@ -10,11 +10,11 @@ function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>
     }
 }
 
-function drawObstacles(ctx: CanvasRenderingContext2D, obstacles: Set<Obstacle>) {
-    obstacles.forEach(obstacle => {
+function drawObstacles(ctx: CanvasRenderingContext2D) {
+    for (const obstacle of eS.obstacles.values()) {
         ctx.fillStyle = obstacle.color;
         ctx.fillRect(obstacle.cords.x, obstacle.cords.y, obstacle.size.x, obstacle.size.y);
-    });
+    };
 }
 
 function drawObstacleParameters(obstacle: Obstacle, ctx: CanvasRenderingContext2D, buttons: Set<Button>) {
@@ -131,16 +131,14 @@ function drawHandlers(obstacle: Obstacle, buttons: Set<Button>) {
     });
 }
 
-function drawOutlines(obstacle: Obstacle, ctx: CanvasRenderingContext2D) {
+function drawOutlines(size: { x: number, y: number }, cords: { x: number, y: number }, ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = "purple";
-    const { x: cx, y: cy } = obstacle.cords;
-    const { x: w, y: h } = obstacle.size;
     const padding = 10;
 
-    ctx.fillRect(cx, cy, w, padding);
-    ctx.fillRect(cx, cy, padding, h);
-    ctx.fillRect(cx, cy + h - padding, w, padding);
-    ctx.fillRect(cx + w - padding, cy, padding, h);
+    ctx.fillRect(cords.x, cords.y, size.x, padding);
+    ctx.fillRect(cords.x, cords.y, padding, size.y);
+    ctx.fillRect(cords.x, cords.y + size.y - padding, size.x, padding);
+    ctx.fillRect(cords.x + size.x - padding, cords.y, padding, size.y);
 }
 
 function drawValueControl(
@@ -150,9 +148,9 @@ function drawValueControl(
     setter: (val: number) => void,
     ctx: CanvasRenderingContext2D
 ) {
-    const buttonWidth = 30;
+    const buttonWidth = 40;
     const height = 30;
-    const spacing = 40;
+    const spacing = 50;
 
     const controls = [
         { label: "--", offset: 0, change: -10 },
@@ -177,18 +175,30 @@ function drawValueControl(
                 size: { x: buttonWidth, y: height },
                 onClick: () => setter(getter() + control.change!),
                 color: "black",
+                label: control.label,
             });
-
-            ctx.fillText(control.label, x + 4, cords.y + height * 0.7);
         }
     }
 }
 
-function drawButtons(buttons: Set<Button>, ctx: CanvasRenderingContext2D) {
-    for (const button of buttons) {
+function drawButtons(ctx: CanvasRenderingContext2D) {
+    for (const button of eS.buttons.values()) {
         ctx.fillStyle = button.color;
         ctx.fillRect(button.cords.x, button.cords.y, button.size.x, button.size.y);
+        ctx.fillStyle = "red";
+        if (button.label) ctx.fillText(button.label, button.cords.x, button.cords.y + 20);
     }
 }
 
-export { drawHandlers, drawOutlines, drawObstacleParameters, drawButtons, drawPlayers, drawObstacles };
+function drawTools(ctx: CanvasRenderingContext2D) {
+    ctx.font = "16px Arial";
+
+    for (const tool of eS.tools.values()) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(tool.cords.x, tool.cords.y, tool.size.x, tool.size.y);
+        ctx.fillStyle = "red";
+        ctx.fillText(tool.label, tool.cords.x, tool.cords.y + 20);
+    }
+}
+
+export { drawHandlers, drawOutlines, drawObstacleParameters, drawButtons, drawPlayers, drawObstacles, drawTools };
