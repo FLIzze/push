@@ -1,15 +1,14 @@
-import type { Button, Tool } from "../../../types/types";
-import { Obstacle } from "../obstacle";
+import type { Tool } from "../../../types/types";
+import type { Obstacle } from "../../types";
 
 export const editorState = {
+    lastMousePos: { x: 0, y: 0 },
     mousePos: { x: 0, y: 0 },
-    dragOffset: { x: 0, y: 0 },
-    resizeOffset: { x: 0, y: 0 },
-    drag: { value: false },
-    resizeDirection: { value: null as "left" | "top" | "right" | "bottom" | null },
-    selectedObstacle: { value: null as Obstacle | null },
-    tool: { value: "" as "edit" | "delete" | "add" },
+    drag: false,
+    selectedObstacle: null as Obstacle | null,
+    tool: "add" as "add" | "delete",
     tools: new Set<Tool>(),
-    buttons: new Set<Button>(),
     obstacles: new Set<Obstacle>(),
+    gridSize: 16,
+    scale: 2,
 };

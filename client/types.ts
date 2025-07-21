@@ -3,3 +3,8 @@ export enum Direction {
     Right,
     Up,
 }
+
+export interface Obstacle {
+    cords: { x: number, y: number };
+    color: string;
+}

@@ -1,5 +1,5 @@
-import { drawButtons, drawObstacleParameters, drawOutlines, drawObstacles, drawTools } from "../utils/draw.ts";
-import { getButtonUnderMouse, getObstacleUnderMouse, getToolUnderMouse, handleKeypress, handleLeftClick, handleMouseMove, handleMouseUp } from "./handler.ts";
+import { drawObstacles, drawTools, drawGrid, drawToolHover } from "../utils/draw.ts";
+import { handleKeypress, handleMouseDown, handleMouseMove } from "./handler.ts";
 import { editorState as eS } from "./state.ts";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -17,11 +17,6 @@ eS.tools.add({
     size: { x: 60, y: 60 },
     label: "delete",
 });
-eS.tools.add({
-    cords: { x: 140, y: 0 },
-    size: { x: 60, y: 60 },
-    label: "edit",
-});
 
 document.addEventListener("keypress", (e) => {
     handleKeypress(e);
@@ -31,56 +26,22 @@ document.addEventListener("mousemove", (e) => {
     handleMouseMove(e);
 });
 
-document.addEventListener("mouseup", () => {
-    handleMouseUp();
+document.addEventListener("mousedown", (e) => {
+    handleMouseDown(e);
 });
 
-document.addEventListener("mousedown", (e) => {
-    switch (e.button) {
-        case 0:
-            handleLeftClick(e);
-            break;
-        default:
-            break;
-    }
+document.addEventListener("mouseup", () => {
+    eS.drag = false;
 });
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    eS.buttons.clear();
 
+    drawGrid(ctx, canvas);
     drawObstacles(ctx);
 
-    if (eS.selectedObstacle.value) {
-        drawObstacleParameters(eS.selectedObstacle.value, ctx, eS.buttons);
-    }
-
-    if (!eS.selectedObstacle.value) {
-        const hoveredObstacle = getObstacleUnderMouse();
-        if (hoveredObstacle && eS.tool.value !== "add") drawOutlines(hoveredObstacle.size, hoveredObstacle.cords, ctx);
-    }
-
-    if (eS.buttons.size > 0) {
-        drawButtons(ctx);
-    }
-
     drawTools(ctx);
-
-    for (const tool of eS.tools.values()) {
-        if (tool.label === eS.tool.value) {
-            drawOutlines(tool.size, tool.cords, ctx);
-        }
-    }
-
-    if (eS.drag.value) {
-        canvas.style.cursor = "grabbing";
-    } else if (getToolUnderMouse()) {
-        canvas.style.cursor = "pointer";
-    } else if (getButtonUnderMouse()) {
-        canvas.style.cursor = "pointer";
-    } else {
-        canvas.style.cursor = "default";
-    }
+    drawToolHover(ctx);
 
     requestAnimationFrame(gameLoop);
 }

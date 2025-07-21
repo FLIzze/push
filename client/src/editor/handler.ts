@@ -1,116 +1,50 @@
-import type { Button, Tool } from "../../../types/types";
-import { Obstacle } from "../obstacle";
 import { editorState as eS } from "./state.ts";
+import type { Obstacle } from "../../types.ts";
+import { addObstacle, deleteObstacle, returnObstacleUnderMouse } from "./utils.ts";
 
 function handleLeftClick(e: MouseEvent) {
-    const tool = getToolUnderMouse();
-    if (tool && tool.label) {
-        eS.tool.value = tool.label;
-        return;
-    }
+    eS.drag = true;
+    const scale = eS.scale * eS.gridSize;
+    eS.lastMousePos.x = Math.floor(e.x / scale);
+    eS.lastMousePos.y = Math.floor(e.y / scale);
 
-    switch (eS.tool.value) {
+    switch (eS.tool) {
         case "add":
-            const newObstacle = new Obstacle({ x: e.x, y: e.y }, { x: 200, y: 200 }, "red");
-            eS.obstacles.add(newObstacle);
+            const newObstacle: Obstacle = {
+                cords: { x: eS.mousePos.x, y: eS.mousePos.y },
+                color: "red",
+            };
+
+            addObstacle(newObstacle);
             break;
         case "delete":
-            const obstacle = getObstacleUnderMouse();
+            const obstacle = returnObstacleUnderMouse();
             if (obstacle) {
-                eS.obstacles.delete(obstacle);
-                eS.selectedObstacle.value = null;
-            }
-            break;
-        case "edit":
-            if (handleButtonClick()) return;
-
-            const obstacle2 = getObstacleUnderMouse();
-            if (obstacle2) {
-                eS.selectedObstacle.value = obstacle2;
-                return;
-            }
-
-            if (eS.selectedObstacle.value) {
-                eS.selectedObstacle.value = null;
-                return;
+                deleteObstacle(obstacle);
             }
             break;
         default:
             break;
     }
-
 }
 
-function handleButtonClick(): boolean {
-    for (const button of eS.buttons) {
-        if (isPointInside(eS.mousePos, button.cords, button.size)) {
-            button.onClick();
-            return true;
-        }
-    }
-    return false;
-}
-
-function isPointInside(
-    point: { x: number; y: number },
-    topLeft: { x: number; y: number },
-    size: { x: number; y: number }
-): boolean {
-    return (
-        point.x > topLeft.x &&
-        point.x < topLeft.x + size.x &&
-        point.y > topLeft.y &&
-        point.y < topLeft.y + size.y
-    );
-}
-
-function getObstacleUnderMouse(): Obstacle | null {
-    for (const obstacle of eS.obstacles) {
-        if (isPointInside(eS.mousePos, obstacle.cords, obstacle.size)) {
-            return obstacle;
-        }
-    }
-    return null;
-}
-
-function getToolUnderMouse(): Tool | null {
-    for (const tool of eS.tools) {
-        if (isPointInside(eS.mousePos, tool.cords, tool.size)) {
-            return tool;
-        }
-    }
-    return null;
-}
-
-function getButtonUnderMouse(): Button | null {
-    for (const button of eS.buttons) {
-        if (isPointInside(eS.mousePos, button.cords, button.size)) {
-            return button;
-        }
-    }
-    return null;
-}
-
-function handleMouseUp() {
-    if (eS.drag.value) eS.drag.value = false;
-
-    if (eS.resizeDirection.value) {
-        eS.resizeDirection.value = null;
-        eS.resizeOffset.x = 0;
-        eS.resizeOffset.y = 0;
+function handleMouseDown(e: MouseEvent) {
+    switch (e.button) {
+        case 0:
+            handleLeftClick(e);
+            break;
+        default:
+            break;
     }
 }
 
 function handleKeypress(e: KeyboardEvent) {
     switch (e.key) {
         case "a":
-            eS.tool.value = "add";
+            eS.tool = "add";
             break;
         case "d":
-            eS.tool.value = "delete";
-            break;
-        case "e":
-            eS.tool.value = "edit";
+            eS.tool = "delete";
             break;
         default:
             break;
@@ -118,48 +52,54 @@ function handleKeypress(e: KeyboardEvent) {
 }
 
 function handleMouseMove(e: MouseEvent) {
-    eS.mousePos.x = e.x;
-    eS.mousePos.y = e.y;
+    const scale = eS.scale * eS.gridSize;
+    const newX = Math.floor(e.x / scale);
+    const newY = Math.floor(e.y / scale);
 
-    if (eS.selectedObstacle.value && eS.drag.value) {
-        eS.selectedObstacle.value.cords.x = eS.mousePos.x - eS.dragOffset.x;
-        eS.selectedObstacle.value.cords.y = eS.mousePos.y - eS.dragOffset.y;
+    const prev = eS.lastMousePos;
+    eS.mousePos = { x: newX, y: newY };
+
+    if (!eS.drag) {
+        eS.lastMousePos = { ...eS.mousePos };
+        return;
     }
 
-    if (!eS.selectedObstacle.value || !eS.resizeDirection.value) return;
+    // Bresenham grid fill
+    const dx = Math.abs(newX - prev.x);
+    const dy = Math.abs(newY - prev.y);
+    const sx = newX > prev.x ? 1 : -1;
+    const sy = newY > prev.y ? 1 : -1;
 
-    const dx = eS.mousePos.x - eS.resizeOffset.x;
-    const dy = eS.mousePos.y - eS.resizeOffset.y;
+    let x = prev.x;
+    let y = prev.y;
 
-    switch (eS.resizeDirection.value) {
-        case "right":
-            eS.selectedObstacle.value.size.x = Math.max(10, eS.selectedObstacle.value.size.x + dx);
-            eS.resizeOffset.x = eS.mousePos.x;
-            break;
-        case "left":
-            const newWidth = eS.selectedObstacle.value.size.x - dx;
-            if (newWidth >= 10) {
-                eS.selectedObstacle.value.cords.x += dx;
-                eS.selectedObstacle.value.size.x = newWidth;
-                eS.resizeOffset.x = eS.mousePos.x;
+    let err = dx - dy;
+
+    while (true) {
+        const currentPos = { x, y };
+        if (eS.tool === "add") {
+            addObstacle({ cords: currentPos, color: "red" });
+        } else if (eS.tool === "delete") {
+            const obstacle = returnObstacleUnderMouse();
+            if (obstacle) {
+                deleteObstacle(obstacle);
             }
-            break;
-        case "bottom":
-            eS.selectedObstacle.value.size.y = Math.max(10, eS.selectedObstacle.value.size.y + dy);
-            eS.resizeOffset.y = eS.mousePos.y;
-            break;
-        case "top":
-            const newHeight = eS.selectedObstacle.value.size.y - dy;
-            if (newHeight >= 10) {
-                eS.selectedObstacle.value.cords.y += dy;
-                eS.selectedObstacle.value.size.y = newHeight;
-                eS.resizeOffset.y = eS.mousePos.y;
-            }
-            break;
-        default:
-            console.error(`ResizeDirection ${eS.resizeDirection.value} does not exist.`);
-            break;
+        }
+
+        if (x === newX && y === newY) break;
+
+        const e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y += sy;
+        }
     }
+
+    eS.lastMousePos = { x: newX, y: newY };
 }
 
-export { handleKeypress, handleLeftClick, handleMouseMove, handleMouseUp, getObstacleUnderMouse, getButtonUnderMouse, getToolUnderMouse };
+export { handleKeypress, handleLeftClick, handleMouseMove, handleMouseDown };
