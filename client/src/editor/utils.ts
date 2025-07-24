@@ -1,17 +1,59 @@
-import type { Obstacle } from "../../types";
+import type { Button, Obstacle, Pixel, Tile } from "../../../types/types";
 import { editorState as eS } from "./state";
 
-function addObstacle(newObstacle: Obstacle) {
-    for (const obstacle of eS.obstacles) {
-        if (newObstacle.cords.x === obstacle.cords.x && newObstacle.cords.y === obstacle.cords.y) {
+export function addPixel(newPixel: Pixel) {
+    for (const pixel of eS.pixels) {
+        if (newPixel.cords.x === pixel.cords.x && newPixel.cords.y === pixel.cords.y) {
+            if (newPixel.color !== pixel.color) {
+                pixel.color = newPixel.color;
+            }
+
             return;
         }
     }
 
-    eS.obstacles.add(newObstacle);
+    eS.pixels.add(newPixel);
 }
 
-function returnObstacleUnderMouse(): Obstacle | null {
+export function returnButtonUnderMouse(): Button | null {
+    const mX = eS.mousePos.x * eS.tileSize;
+    const mY = eS.mousePos.y * eS.tileSize;
+
+    for (const button of eS.buttons) {
+        if (
+            button.cords.x < mX &&
+            button.cords.x + button.size.x > mX &&
+            button.cords.y < mY &&
+            button.cords.y + button.size.y > mY
+        ) {
+            return button;
+        }
+    }
+
+    return null;
+}
+
+export function returnPixelUnderMouse(): Pixel | null {
+    for (const pixel of eS.pixels) {
+        if (pixel.cords.x === eS.mousePos.x && pixel.cords.y === eS.mousePos.y) {
+            return pixel;
+        }
+    }
+
+    return null;
+}
+
+export function returnColorUnderMouse(): Pixel | null {
+    for (const color of eS.colors) {
+        if (color.cords.x === eS.mousePos.x && color.cords.y === eS.mousePos.y) {
+            return color;
+        }
+    }
+
+    return null;
+}
+
+export function returnObstacleUnderMouse(): Obstacle | null {
     for (const obstacle of eS.obstacles) {
         if (obstacle.cords.x === eS.mousePos.x && obstacle.cords.y === eS.mousePos.y) {
             return obstacle;
@@ -21,8 +63,35 @@ function returnObstacleUnderMouse(): Obstacle | null {
     return null;
 }
 
-function deleteObstacle(obstacle: Obstacle) {
+export function deleteObstacle(obstacle: Obstacle) {
     eS.obstacles.delete(obstacle);
 }
 
-export { addObstacle, returnObstacleUnderMouse, deleteObstacle };
+export function deletePixel(pixel: Pixel) {
+    eS.pixels.delete(pixel);
+}
+
+export function saveTile(tile: Tile) {
+    const json = JSON.stringify(tile, null, 2);
+
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = tile.id;
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+export function addTile(cords: { x: number, y: number }) {
+    if (!eS.tile) return;
+    if (eS.tiles.has(`${cords.x}:${cords.y}`)) return;
+
+    eS.tiles.set(`${cords.x}:${cords.y}`, eS.tile);
+}
+
+export function deleteTile(cords: { x: number, y: number }) {
+    eS.tiles.delete(`${cords.x}:${cords.y}`);
+}

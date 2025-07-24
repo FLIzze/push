@@ -22,6 +22,33 @@
 </head>
 
 <body>
+    <div id="palette-container" style="
+        position: absolute;
+        background-color: white;
+        color: black;
+        border: 1px solid black;
+        padding: 8px;
+        width: 240px;
+        user-select: none;
+    ">
+        Palette
+        <button id="hide-palette" style="cursor: pointer;">hide</button>
+        <div id="palette"></div>
+    </div>
+
+    <div id="tools-container" style="
+        position: absolute;
+        background-color: white;
+        color: black;
+        border: 1px solid black;
+        padding: 8px;
+        user-select: none;
+    ">
+        Tools
+        <button id="hide-tools" style="cursor: pointer;">hide</button>
+        <div id="tools"></div>
+    </div>
+
     <canvas id="canvas"></canvas>
     <script type="module" src="/src/editor/editor.ts"></script>
 </body>

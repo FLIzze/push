@@ -1,6 +1,5 @@
 import { Player } from "./player";
-import { Obstacle } from "../obstacle.ts";
-import { Direction } from "../../types";
+import { Direction, type Obstacle } from "../../types";
 import { drawObstacles, drawPlayers } from "../utils/draw.ts";
 import { sendInputs, sendPing } from "./websocket.ts";
 
@@ -68,7 +67,7 @@ function gameLoop() {
     lastFrameTime = now;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawObstacles(ctx, obstacles);
+    drawObstacles(ctx);
     drawPlayers(ctx, players);
 
     ctx.fillStyle = "black";

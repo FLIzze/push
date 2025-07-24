@@ -1,6 +1,5 @@
 import type { PlayerInitData } from "../../../types/types.ts";
-import { Direction } from "../../types.ts";
-import type { Obstacle } from "../obstacle.ts";
+import { Direction, type Obstacle } from "../../types.ts";
 import { generateUUID } from "../utils/uuid.ts";
 
 export class Player {

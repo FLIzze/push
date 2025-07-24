@@ -1,6 +1,6 @@
 import type { WsConnect, WsDisconnect, WsPlayersCordBroadcast, WsGameData, WsPing } from "../../../types/types";
+import type { Obstacle } from "../../types.ts";
 import { latency, obstacles } from "./game.ts";
-import { Obstacle } from "../obstacle.ts";
 import { Player } from "./player.ts";
 
 function handleParsedMessage(parsedMessage: any, players: Map<string, Player>) {
@@ -61,7 +61,10 @@ function handlePlayersList(parsedMessage: any, players: Map<string, Player>) {
     }
 
     for (const obstacleData of gameData.obstaclesData) {
-        const newObstacle = new Obstacle(obstacleData.cords, obstacleData.size, obstacleData.color);
+        const newObstacle: Obstacle = {
+            cords: obstacleData.cords,
+            color: obstacleData.color,
+        };
         obstacles.add(newObstacle);
     }
 }
