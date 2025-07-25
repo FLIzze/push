@@ -1,0 +1,80 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+}
+
+#palette {
+    display: grid;
+    grid-template-columns: repeat(8, 30px);
+    width: fit-content;
+}
+
+.palette-color {
+    border: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    transition: transform 0.1s ease;
+}
+
+.palette-color:hover {
+    transform: scale(1.2);
+    outline: 2px solid white;
+}
+
+.palette-color.selected {
+    transform: scale(1.2);
+    outline: 2px solid white;
+}
+
+.container {
+    position: absolute;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    padding: 8px;
+    user-select: none;
+    cursor: grab;
+}
+
+.container:active {
+    cursor: grabbing;
+}
+
+.tool {
+    display: flex;
+    margin-top: 8px;
+    transition: transform 0.1s ease;
+    border: none;
+    background-color: white;
+    border-radius: 4px;
+}
+
+.tool:hover {
+    outline: 2px solid black;
+}
+
+.img {
+    cursor: pointer;
+    display: flex;
+    margin: 15px;
+    padding: 1px;
+    width: 40px;
+    height: 40px;
+    transition: transform 0.1s ease;
+}
+
+.img:hover {
+    outline: 2px solid black;
+}
+
+.img.selected {
+    outline: 2px solid black;
+}
+
+.tool.selected {
+    outline: 2px solid black;
+}

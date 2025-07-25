@@ -7,7 +7,7 @@ export const editorState = {
     isCreatingTile: true,
     isDragging: false,
 
-    selectedTool: "add" as ToolName,
+    selectedTool: "" as ToolName,
 };
 
 export const tileEditor = {
@@ -18,7 +18,7 @@ export const tileEditor = {
     pixels: Array.from({ length: 16 },
         () => Array(16).fill(null)),
 
-    selectedColor: "black",
+    selectedColor: "",
 };
 
 export const mapEditor = {
@@ -73,10 +73,12 @@ export const tools = {
         [
             {
                 name: "add",
+                img: "../../public/img/draw.svg",
                 shortcut: "a",
             },
             {
                 name: "delete",
+                img: "../../public/img/delete.svg",
                 shortcut: "d",
             },
         ] as Tool[],

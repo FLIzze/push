@@ -1,7 +1,7 @@
 import type { Player } from "../game/player.ts";
 import { editorState, mapEditor, tileEditor } from "../editor/state.ts";
 
-function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>) {
+export function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>) {
     for (const player of players.values()) {
         ctx.fillStyle = player.color;
         ctx.fillRect(player.cords.x, player.cords.y, player.size.x, player.size.y);
@@ -9,99 +9,53 @@ function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>
 }
 
 export function drawPixels(ctx: CanvasRenderingContext2D) {
+    if (tileEditor.selectedColor === "") return;
+
     const size = tileEditor.tileSize;
-    const arr = tileEditor.pixels;
+    const pixels = tileEditor.pixels;
 
-    for (let y = 0; y < arr.length; y++) {
-        for (let x = 0; x < arr[y].length; x++) {
-            if (arr[y][x] === null) continue;
+    for (let y = 0; y < pixels.length; y++) {
+        for (let x = 0; x < pixels[y].length; x++) {
+            if (pixels[y][x] === null) continue;
 
-            ctx.fillStyle = arr[y][x];
+            ctx.fillStyle = pixels[y][x];
             ctx.fillRect(x * size, y * size, size, size);
         }
     }
 }
 
 export function drawTiles(ctx: CanvasRenderingContext2D) {
-    // for (const tile of eS.tiles.entries()) {
-    //     const cords = tile[0].split(":");
-    //     const pixelsArr = eS.temporaryTile.get(tile[1]);
-    //     if (!pixelsArr) return;
+    for (const [coords, id] of mapEditor.placedTiles.entries()) {
+        const size = mapEditor.tileSize;
 
-    //     let gridPositionX = Number(cords[0]) * eS.tileSize;
-    //     let gridPositionY = Number(cords[1]) * eS.tileSize;
+        const splittedCoords = coords.split(":");
+        let cX = Number(splittedCoords[0]) * size;
+        let cY = Number(splittedCoords[1]) * size;
 
-    //     for (const x of pixelsArr) {
-    //         for (const y of x) {
-    //             ctx.fillStyle = y;
+        const selectedTile = mapEditor.tiles.get(id);
+        if (!selectedTile) return;
+        const pixels = selectedTile.pixels;
 
-    //             ctx.fillRect(
-    //                 gridPositionX,
-    //                 gridPositionY,
-    //                 eS.tileSize / 16,
-    //                 eS.tileSize / 16,
-    //             );
+        for (let y = 0; y < pixels.length; y++) {
+            for (let x = 0; x < pixels[y].length; x++) {
+                if (pixels[y][x] === null) continue;
 
-    //             gridPositionX += eS.tileSize / 16;
-    //         }
-    //         gridPositionX = Number(cords[0]) * eS.tileSize;
-    //         gridPositionY += eS.tileSize / 16;
-    //     }
-
-    // }
+                ctx.fillStyle = pixels[y][x];
+                ctx.fillRect(x * size, y * size, size, size);
+            }
+        }
+    }
 }
 
-function drawTools(ctx: CanvasRenderingContext2D) {
-    // ctx.font = "16px Arial";
-
-    // for (const tool of eS.tools.values()) {
-    //     ctx.fillStyle = "yellow";
-    //     ctx.fillRect(tool.cords.x, tool.cords.y, tool.size.x, tool.size.y);
-    //     ctx.fillStyle = "red";
-    //     ctx.fillText(tool.label, tool.cords.x, tool.cords.y + 20);
-    // }
-    // }
-
-    // function drawButtons(ctx: CanvasRenderingContext2D) {
-    // ctx.font = "16px Arial";
-
-    // for (const button of eS.buttons) {
-    //     ctx.fillStyle = "yellow";
-    //     ctx.fillRect(button.cords.x, button.cords.y, button.size.x, button.size.y);
-    //     ctx.fillStyle = "red";
-    //     ctx.fillText(button.label, button.cords.x, button.cords.y + 20);
-    // }
-}
-
-function drawToolHover(ctx: CanvasRenderingContext2D) {
-    // ctx.fillStyle = "blue";
-
-    // for (const tool of eS.tools) {
-    //     if (tool.label === eS.tool) {
-    //         ctx.fillRect(
-    //             tool.cords.x,
-    //             tool.cords.y + tool.size.y,
-    //             tool.size.x,
-    //             5
-    //         );
-    //     }
-    // }
-}
-
-function drawGrid(ctx: CanvasRenderingContext2D) {
+export function drawGrid(ctx: CanvasRenderingContext2D, editor: typeof tileEditor | typeof mapEditor) {
     ctx.strokeStyle = "#ccc";
     ctx.lineWidth = 1;
 
     let size = 0;
     let nbrTile = { x: 0, y: 0 };
 
-    if (editorState.isCreatingTile) {
-        size = tileEditor.tileSize;
-        nbrTile = tileEditor.nbrTileInGrid;
-    } else {
-        size = mapEditor.tileSize;
-        nbrTile = mapEditor.nbrTileInGrid;
-    }
+    size = editor.tileSize;
+    nbrTile = editor.nbrTileInGrid;
 
     for (let x = 0; x <= nbrTile.x; x++) {
         ctx.beginPath();
@@ -117,33 +71,3 @@ function drawGrid(ctx: CanvasRenderingContext2D) {
         ctx.stroke();
     }
 }
-
-export function drawAvailableTiles(ctx: CanvasRenderingContext2D) {
-    for (const tile of eS.availableTiles.entries()) {
-        const cords = tile[0].split(":");
-        const pixelsArr = tile[1];
-
-        let gridPositionX = Number(cords[0]) * eS.tileSize;
-        let gridPositionY = Number(cords[1]) * eS.tileSize;
-
-        for (const x of pixelsArr.pixels) {
-            for (const y of x) {
-                ctx.fillStyle = y;
-
-                ctx.fillRect(
-                    gridPositionX,
-                    gridPositionY,
-                    eS.tileSize / 16,
-                    eS.tileSize / 16,
-                );
-
-                gridPositionX += eS.tileSize / 16;
-            }
-            gridPositionX = Number(cords[0]) * eS.tileSize;
-            gridPositionY += eS.tileSize / 16;
-        }
-
-    }
-}
-
-export { drawGrid, drawPlayers, drawTools, drawToolHover };

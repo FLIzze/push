@@ -1,5 +1,5 @@
 import type { Button, Obstacle, Pixel, Tile } from "../../../types/types";
-import { editorState as eS } from "./state";
+import { editorState, editorState as eS, mapEditor } from "./state";
 
 export function addPixel(newPixel: Pixel) {
     for (const pixel of eS.pixels) {
@@ -83,15 +83,4 @@ export function saveTile(tile: Tile) {
     link.click();
 
     URL.revokeObjectURL(url);
-}
-
-export function addTile(cords: { x: number, y: number }) {
-    if (!eS.tile) return;
-    if (eS.tiles.has(`${cords.x}:${cords.y}`)) return;
-
-    eS.tiles.set(`${cords.x}:${cords.y}`, eS.tile);
-}
-
-export function deleteTile(cords: { x: number, y: number }) {
-    eS.tiles.delete(`${cords.x}:${cords.y}`);
 }
