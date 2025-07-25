@@ -71,6 +71,7 @@ export interface Color {
 
 export interface Tool {
     name: ToolName,
+    img: string,
     shortcut: string,
 };
 

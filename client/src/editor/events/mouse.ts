@@ -1,11 +1,11 @@
 import { hidePaletteButton, hideToolsButton, paletteContainer, paletteDiv, toolsContainer, toolsDiv } from "../eventListener";
-import { editorState, mapEditor, palette, tileEditor, tools } from "../state";
+import { editorState, mapEditor, palette, tileEditor, tiles, tools } from "../state";
 
 export function handleCanvasLeftClick(e: MouseEvent) {
     if (e.button !== 0) return; // 0 is left click
 
-    const cX = editorState.mousePos.x;
-    const cY = editorState.mousePos.y;
+    const cX = editorState.canvasMousePos.x;
+    const cY = editorState.canvasMousePos.y;
 
     const isClickingOnGrid = (
         cX < tileEditor.nbrTileInGrid.x && cY < tileEditor.nbrTileInGrid.y
@@ -31,11 +31,11 @@ export function handleCanvasLeftClick(e: MouseEvent) {
     }
 }
 
-export function handleMouseMove(e: MouseEvent) {
+export function handleGlobalMouseMove(e: MouseEvent) {
     const editor = editorState.isCreatingTile ? tileEditor : mapEditor;
 
-    editorState.mousePos.x = Math.floor(e.clientX / editor.tileSize);
-    editorState.mousePos.y = Math.floor(e.clientY / editor.tileSize);
+    editorState.globalMousePos.x = Math.floor(e.clientX / editor.tileSize);
+    editorState.globalMousePos.y = Math.floor(e.clientY / editor.tileSize);
 
     if (palette.isDragging) {
         palette.coords.x = e.clientX - palette.offset.x;
@@ -62,7 +62,7 @@ export function hideTools() {
 
 export function hidePalette() {
     palette.visible = !palette.visible;
-    paletteDiv.style.display = palette.visible ? "grid" : "none";
+    paletteDiv.style.display = palette.visible ? "block" : "none";
     hidePaletteButton.textContent = palette.visible ? "hide" : "show";
 }
 
@@ -81,6 +81,7 @@ export function startPaletteDragging(e: MouseEvent) {
 export function stopDragging() {
     palette.isDragging = false;
     tools.isDragging = false;
+    tiles.isDragging = false;
 }
 
 export function handleZoom(e: WheelEvent) {
@@ -89,4 +90,36 @@ export function handleZoom(e: WheelEvent) {
     const editor = editorState.isCreatingTile ? tileEditor : mapEditor;
 
     editor.zoomLevel = Math.max(0.1, Math.min(5, editor.zoomLevel + zoom));
+}
+
+export function handleCanvasMouseMove(e: MouseEvent) {
+    const editor = editorState.isCreatingTile ? tileEditor : mapEditor;
+    const canvas = e.target as HTMLCanvasElement;
+
+    const rect = canvas.getBoundingClientRect();
+
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    editorState.canvasMousePos.x = Math.floor(mouseX / editor.tileSize);
+    editorState.canvasMousePos.y = Math.floor(mouseY / editor.tileSize);
+}
+
+
+export function handlePaletteColorClick(button: HTMLButtonElement, color: string) {
+    document.querySelectorAll(".palette-color.selected").forEach(el => {
+        el.classList.remove("selected");
+    });
+
+    button.classList.add("selected");
+    tileEditor.selectedColor = color;
+}
+
+export function handlePaletteTileClick(canvas: HTMLCanvasElement, id: string) {
+    document.querySelectorAll(".palette-canvas.selected").forEach(el => {
+        el.classList.remove("selected");
+    });
+
+    mapEditor.selectedTileId = id;
+    canvas.classList.add("selected");
 }

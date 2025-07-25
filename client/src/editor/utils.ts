@@ -1,5 +1,6 @@
 import type { Button, Obstacle, Pixel, Tile } from "../../../types/types";
-import { editorState, editorState as eS, mapEditor } from "./state";
+import { generateUUID } from "../utils/uuid";
+import { editorState, editorState as eS, mapEditor, tileEditor } from "./state";
 
 export function addPixel(newPixel: Pixel) {
     for (const pixel of eS.pixels) {
@@ -71,15 +72,21 @@ export function deletePixel(pixel: Pixel) {
     eS.pixels.delete(pixel);
 }
 
-export function saveTile(tile: Tile) {
-    const json = JSON.stringify(tile, null, 2);
+export function saveTile() {
+    const tileId = generateUUID();
 
+    const tile: Tile = {
+        id: tileId,
+        pixels: tileEditor.pixels,
+    };
+
+    const json = JSON.stringify(tile, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = tile.id;
+    link.download = tileId;
     link.click();
 
     URL.revokeObjectURL(url);

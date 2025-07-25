@@ -1,4 +1,5 @@
 import { editorState } from "../state";
+import { setupPalette } from "../ui/palette";
 import { updateToolSelectionUI } from "../ui/tools";
 
 export function handleToolSelection(e: KeyboardEvent) {
@@ -13,6 +14,7 @@ export function handleToolSelection(e: KeyboardEvent) {
             break;
         case "c":
             editorState.isCreatingTile = !editorState.isCreatingTile;
+            setupPalette();
             break;
         default:
             break;

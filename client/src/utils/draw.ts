@@ -1,5 +1,5 @@
 import type { Player } from "../game/player.ts";
-import { editorState, mapEditor, tileEditor } from "../editor/state.ts";
+import { editorConfig, mapEditor, tileEditor } from "../editor/state.ts";
 
 export function drawPlayers(ctx: CanvasRenderingContext2D, players: Map<string, Player>) {
     for (const player of players.values()) {
@@ -25,23 +25,29 @@ export function drawPixels(ctx: CanvasRenderingContext2D) {
 }
 
 export function drawTiles(ctx: CanvasRenderingContext2D) {
-    for (const [coords, id] of mapEditor.placedTiles.entries()) {
-        const size = mapEditor.tileSize;
+    const pixelSize = mapEditor.tileSize / editorConfig.resolution;
+
+    for (const tile of mapEditor.placedTiles.entries()) {
+        const coords = tile[0];
+        const id = tile[1];
 
         const splittedCoords = coords.split(":");
-        let cX = Number(splittedCoords[0]) * size;
-        let cY = Number(splittedCoords[1]) * size;
+        const cX = Math.ceil(Number(splittedCoords[0]) * mapEditor.tileSize);
+        const cY = Math.ceil(Number(splittedCoords[1]) * mapEditor.tileSize);
 
         const selectedTile = mapEditor.tiles.get(id);
         if (!selectedTile) return;
-        const pixels = selectedTile.pixels;
 
-        for (let y = 0; y < pixels.length; y++) {
-            for (let x = 0; x < pixels[y].length; x++) {
-                if (pixels[y][x] === null) continue;
+        const pixels = selectedTile.pixels;
+        const length = pixels.length;
+
+        for (let y = 0; y < length; y++) {
+            for (let x = 0; x < length; x++) {
+                const color = pixels[y][x];
+                if (!color) continue;
 
                 ctx.fillStyle = pixels[y][x];
-                ctx.fillRect(x * size, y * size, size, size);
+                ctx.fillRect(cX + x * pixelSize, cY + y * pixelSize, pixelSize, pixelSize);
             }
         }
     }

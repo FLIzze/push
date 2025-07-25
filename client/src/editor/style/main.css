@@ -7,9 +7,8 @@ body {
 }
 
 #palette {
-    display: grid;
-    grid-template-columns: repeat(8, 30px);
     width: fit-content;
+    margin: 15px;
 }
 
 .palette-color {
@@ -17,17 +16,31 @@ body {
     cursor: pointer;
     width: 30px;
     height: 30px;
-    transition: transform 0.1s ease;
 }
 
 .palette-color:hover {
     transform: scale(1.2);
-    outline: 2px solid white;
+    outline: 2px solid black;
 }
 
 .palette-color.selected {
     transform: scale(1.2);
-    outline: 2px solid white;
+    outline: 2px solid black;
+}
+
+.palette-canvas {
+    margin-left: 25px;
+}
+
+.palette-canvas:hover {
+    transform: scale(1.1);
+    outline: 2px solid black;
+    cursor: pointer;
+}
+
+.palette-canvas.selected {
+    transform: scale(1.1);
+    outline: 2px solid black;
 }
 
 .container {
